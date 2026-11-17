@@ -299,6 +299,51 @@
   }
   .home-search:active{opacity:.85;}
 
+  .nearest-store{
+    display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+    background:var(--white);border-radius:14px;padding:14px 14px;
+    margin-bottom:12px;border:.5px solid var(--sep);
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  .nearest-store:active{background:var(--fill);}
+  .nearest-store .ns-icon{
+    width:40px;height:40px;border-radius:12px;background:var(--grouped);
+    display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;
+    color:var(--label2);flex:0 0 auto;
+  }
+  .nearest-store .ns-body{flex:1;min-width:0;}
+  .nearest-store .ns-label{
+    font-size:11px;color:var(--secondary);letter-spacing:.2px;margin-bottom:3px;
+  }
+  .nearest-store .ns-name{
+    font-size:15px;font-weight:600;line-height:1.25;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .nearest-store .ns-meta{
+    font-size:11px;color:var(--secondary);margin-top:3px;
+  }
+  .nearest-store .ns-go{
+    flex:0 0 auto;font-size:12px;font-weight:600;color:var(--label);
+    background:var(--grouped);border-radius:999px;padding:7px 12px;
+  }
+
+  .shop-ctx{
+    background:var(--white);border-radius:14px;padding:12px 14px;
+    margin-bottom:10px;border:.5px solid var(--sep);
+  }
+  .shop-ctx .row-store{
+    display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+    margin-bottom:10px;
+  }
+  .shop-ctx .row-store .pill{flex-shrink:0;}
+  .shop-ctx .row-store .name{
+    flex:1;min-width:0;font-size:15px;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .shop-ctx .price-note{
+    font-size:11px;color:var(--secondary);margin-top:8px;line-height:1.45;
+  }
+
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
@@ -1044,22 +1089,16 @@ function screenHome(){
         <div class="hb-dots"><i class="on"></i><i></i><i></i></div>
       </button>
 
-      <!-- 门店 + 履约 -->
-      <div class="card pad-card" style="margin-bottom:12px;">
-        <div class="flex between items-c" style="margin-bottom:12px;">
-          <button class="flex items-c gap8" onclick="openStoreSheet()" style="text-align:left;">
-            <span class="pill dark" style="font-size:11px;">门店</span>
-            <span class="fw6" style="font-size:15px;">${state.store}</span>
-            ${icons.chev}
-          </button>
-          <span class="xs muted">定位深圳</span>
+      <!-- 最近门店：点击进入「购物」再选门店/履约（价格可能不同） -->
+      <button class="nearest-store" onclick="goTab('category')" aria-label="最近门店，去购物页选择">
+        <div class="ns-icon">店</div>
+        <div class="ns-body">
+          <div class="ns-label">距你最近 · 点击去购物选门店</div>
+          <div class="ns-name">${nearestStore().name}</div>
+          <div class="ns-meta">${nearestStore().dist} · ${nearestStore().hours} · 自提/配送价可能不同</div>
         </div>
-        <div class="seg">
-          <button class="${state.fulfill==='pickup'?'active':''}" onclick="setFulfill('pickup')">到店自提</button>
-          <button class="${state.fulfill==='delivery'?'active':''}" onclick="setFulfill('delivery')">配送到家</button>
-        </div>
-        <div class="xs muted mt8">${state.fulfill==='pickup' ? '下单后凭提货码到店取货 · 今日营业 08:00–22:00' : '满 39 免运费 · 预计 45 分钟送达'}</div>
-      </div>
+        <span class="ns-go">去购物 ›</span>
+      </button>
 
       <!-- 金刚区：仅 8 个核心入口；订单/地址/券等在「我的」 -->
       <div class="grid4" style="margin-bottom:14px;gap:10px;">
@@ -1108,7 +1147,7 @@ function screenHome(){
           </div>`).join('')}
       </div>
 
-      <div class="notice mt8"><strong>框架说明：</strong>首页不展示购物车浮层；购物车入口在「购物」页与商品详情。价格/库存以所选门店为准。</div>
+      <div class="notice mt8"><strong>动线说明：</strong>首页只展示最近门店，点击进入「购物」；在购物页切换门店，并选择到店自提 / 配送到家（两者价格可能不同）。购物车不在此页浮层首页。</div>
     </div>
   </div>`;
 }
@@ -1192,18 +1231,38 @@ function closeCartDrawer(){
 }
 
 function setFulfill(v){
+  const prev = state.fulfill;
   state.fulfill = v;
   render();
-  toast(v==='pickup'?'已切换到店自提':'已切换配送到家');
+  if(prev !== v){
+    toast(v==='pickup'?'已切换到店自提 · 价格可能已变':'已切换配送到家 · 价格可能已变');
+  }
+}
+
+/* 门店列表：dist 用于首页「距你最近」展示 */
+const storeList = [
+  {name:'深圳南山旗舰店', dist:'0.8km', hours:'08:00–22:00', stock:'有货率 98%'},
+  {name:'深圳福田车公庙店', dist:'3.2km', hours:'08:30–22:30', stock:'有货率 96%'},
+  {name:'深圳宝安中心店', dist:'6.4km', hours:'08:00–22:00', stock:'有货率 94%'},
+  {name:'深圳龙华壹方城店', dist:'9.1km', hours:'09:00–22:00', stock:'有货率 93%'}
+];
+
+function nearestStore(){
+  /* 演示：按 dist 排序取最近；上线接 LBS */
+  return [...storeList].sort((a,b)=>parseFloat(a.dist)-parseFloat(b.dist))[0];
 }
 
 function openStoreSheet(){
-  const stores = ['深圳南山旗舰店','深圳福田车公庙店','深圳宝安中心店','深圳龙华壹方城店'];
-  openSheet('选择门店', stores.map(s=>`
-    <div class="row tappable" onclick="selectStore('${s}')">
-      <div class="grow"><div class="t">${s}</div><div class="s">${s.includes('南山')?'0.8km · 有货率 98%':s.includes('福田')?'3.2km · 有货率 96%':'5km+ · 有货率 94%'}</div></div>
-      ${state.store===s?'<span class="fw6">✓</span>':''}
-    </div>`).join(''));
+  openSheet('选择门店（自提/配送价可能不同）', storeList.map(s=>`
+    <div class="row tappable" onclick="selectStore('${s.name}')">
+      <div class="grow">
+        <div class="t">${s.name}</div>
+        <div class="s">${s.dist} · ${s.hours} · ${s.stock}</div>
+      </div>
+      ${state.store===s.name?'<span class="fw6">✓</span>':''}
+    </div>`).join('') + `
+    <div class="notice mt16">切换门店后商品价格、库存与配送范围会按该店规则展示；到店自提与配送到家售价可能不同。</div>
+  `);
 }
 function selectStore(s){
   state.store=s; closeSheet(); render(); toast('已切换 '+s);
@@ -1235,14 +1294,33 @@ function addToCart(id, name){
 
 function screenCategory(){
   const list = products[state.cat] || [];
+  const isPickup = state.fulfill==='pickup';
   return `
   ${navBar('购物', {back:false, right:`<button onclick="nav('cart')" aria-label="购物车">${icons.cart}</button>`})}
   <div class="content cat-page">
-    <div class="cat-toolbar">
-      <button class="home-search" style="margin-bottom:0;" onclick="nav('search')">
+    <div class="cat-toolbar" style="padding-bottom:10px;">
+      <button class="home-search" style="margin-bottom:10px;" onclick="nav('search')">
         ${icons.search}
         <span>在购物中搜索商品</span>
       </button>
+      <!-- 门店 + 履约：自提/配送价格可能不同，在此选择 -->
+      <div class="shop-ctx">
+        <button class="row-store" onclick="openStoreSheet()">
+          <span class="pill dark" style="font-size:11px;">门店</span>
+          <span class="name">${state.store}</span>
+          <span class="xs muted" style="flex-shrink:0;">切换</span>
+          ${icons.chev}
+        </button>
+        <div class="seg">
+          <button class="${isPickup?'active':''}" onclick="setFulfill('pickup')">到店自提</button>
+          <button class="${!isPickup?'active':''}" onclick="setFulfill('delivery')">配送到家</button>
+        </div>
+        <div class="price-note">
+          ${isPickup
+            ? '当前：到店自提 · 凭提货码取货。切换门店后价格/库存会变。'
+            : '当前：配送到家 · 满 39 免运费。自提与配送售价可能不同，以结算页为准。'}
+        </div>
+      </div>
     </div>
     <div class="cat-layout">
       <div class="cat-side">
@@ -1251,7 +1329,7 @@ function screenCategory(){
       <div class="cat-main">
         <div class="flex between items-c" style="margin:2px 2px 10px;">
           <span class="fw6" style="font-size:16px;">${state.cat}</span>
-          <span class="xs muted">${state.store} · 有货</span>
+          <span class="xs muted">${isPickup?'自提':'配送'}价 · ${state.store.slice(0,6)}…</span>
         </div>
         ${list.map(p=>`
           <div class="tc-goods" onclick="openProduct('${p.id}')">
@@ -1259,8 +1337,8 @@ function screenCategory(){
             <div class="info">
               <div class="title">${p.name}</div>
               <div class="meta">
-                <span>${state.fulfill==='pickup'?'门店现货':'可配送'}</span>
-                <span>${state.store.slice(0,8)}…</span>
+                <span>${isPickup?'门店现货':'可配送'}</span>
+                <span>${isPickup?'自提价':'配送价'}</span>
               </div>
               <div class="prices">
                 <span class="cash">¥${p.price}</span>
