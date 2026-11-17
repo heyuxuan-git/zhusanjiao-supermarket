@@ -269,7 +269,7 @@
 
   .home-hero-banner{
     position:relative;border-radius:16px;overflow:hidden;margin-bottom:12px;
-    background:linear-gradient(135deg,#1C1C1E 0%,#3A3A3C 55%,#5C5C66 100%);
+    background:#1C1C1E;
     color:#fff;min-height:132px;display:block;width:100%;text-align:left;
   }
   .home-hero-banner .hb-pad{padding:18px 16px 16px;display:flex;flex-direction:column;height:100%;min-height:132px;}
@@ -376,12 +376,13 @@
   .notice strong{font-weight:600;color:var(--label);}
 
   .map-ph{
-    height:180px;background:
-      linear-gradient(90deg, var(--fill) 1px, transparent 1px) 0 0/24px 24px,
-      linear-gradient(var(--fill) 1px, transparent 1px) 0 0/24px 24px,
-      var(--grouped);
+    height:180px;background:var(--fill);
     border-radius:var(--r-card);position:relative;overflow:hidden;
     border:.5px solid var(--sep);margin-bottom:12px;
+  }
+  .map-ph .map-label{
+    position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+    text-align:center;font-size:12px;color:var(--secondary);font-weight:500;
   }
   .map-ph .pin{
     position:absolute;width:28px;height:28px;border-radius:50%;
@@ -444,6 +445,133 @@
   }
   .cart-bar .btn:disabled,.cart-bar .btn.is-empty{
     background:var(--fill);color:var(--tertiary);
+  }
+
+  /* 潮匠积分商城结构（灰阶线框）：积分横幅 / 供给条 / Tabs / 横向商品卡 / 悬浮购物车 */
+  .tc-points{
+    background:#1C1C1E;color:#fff;border-radius:16px;padding:18px 16px;
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+  }
+  .tc-points .label{font-size:12px;opacity:.8;display:flex;align-items:center;gap:8px;}
+  .tc-points .label a{color:#fff;opacity:.9;text-decoration:none;font-size:12px;}
+  .tc-points .num{font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1.15;margin-top:4px;}
+  .tc-points .sub{font-size:11px;opacity:.75;margin-top:4px;}
+  .tc-points .mini-btn{
+    background:#fff;color:#1C1C1E;border-radius:999px;font-size:13px;font-weight:600;
+    height:34px;padding:0 16px;display:inline-flex;align-items:center;
+  }
+  .tc-supply{
+    display:flex;align-items:center;gap:8px;margin-bottom:10px;
+    padding:10px 12px;background:var(--grouped);border-radius:12px;border:.5px solid var(--sep);
+  }
+  .tc-supply .tag{
+    flex-shrink:0;background:#1C1C1E;color:#fff;font-size:11px;font-weight:700;
+    padding:3px 8px;border-radius:6px;
+  }
+  .tc-supply .txt{font-size:12px;color:var(--label2);line-height:1.4;}
+  .tc-tabs{
+    display:flex;background:var(--white);border-radius:14px 14px 0 0;overflow:hidden;
+    border:.5px solid var(--sep);border-bottom:none;margin-bottom:0;
+  }
+  .tc-tabs button{
+    flex:1;text-align:center;padding:13px 4px;font-size:14px;color:var(--secondary);
+    position:relative;background:transparent;
+  }
+  .tc-tabs button.on{
+    color:var(--label);font-weight:700;background:var(--white);
+  }
+  .tc-tabs button.on::after{
+    content:"";position:absolute;left:28%;right:28%;bottom:0;height:3px;
+    border-radius:2px;background:#1C1C1E;
+  }
+  .tc-hint{
+    margin:0 0 12px;padding:10px 12px;background:var(--grouped);
+    color:var(--label2);font-size:12px;border-radius:0 0 14px 14px;
+    border:.5px solid var(--sep);border-top:none;
+  }
+  .tc-goods{
+    display:flex;gap:12px;background:var(--white);border-radius:16px;
+    padding:12px;margin-bottom:10px;border:.5px solid var(--sep);
+  }
+  .tc-goods .thumb{
+    width:88px;height:88px;border-radius:12px;background:var(--fill);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:11px;color:var(--secondary);padding:6px;line-height:1.3;flex:0 0 auto;font-weight:500;
+  }
+  .tc-goods .info{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .tc-goods .title{font-size:14px;font-weight:600;line-height:1.35;}
+  .tc-goods .meta{
+    display:flex;justify-content:space-between;margin-top:6px;
+    font-size:11px;color:var(--secondary);
+  }
+  .tc-goods .prices{
+    margin-top:auto;display:flex;align-items:baseline;gap:8px;padding-top:8px;
+  }
+  .tc-goods .points{font-size:15px;font-weight:700;color:var(--label);}
+  .tc-goods .cash{font-size:15px;font-weight:700;color:var(--label);}
+  .tc-goods .add-btn{
+    width:36px;height:36px;border-radius:50%;background:#1C1C1E;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:400;
+    flex:0 0 auto;align-self:flex-end;box-shadow:0 4px 12px rgba(0,0,0,.18);
+  }
+  .cart-fab{
+    position:absolute;right:14px;bottom:88px;width:52px;height:52px;border-radius:50%;
+    background:#1C1C1E;color:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.22);z-index:26;border:none;
+  }
+  .cart-fab .fab-badge{
+    position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;
+    background:var(--fill-2);color:#1C1C1E;font-size:10px;font-weight:700;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;border:2px solid #fff;
+  }
+  .cart-drawer-mask{
+    position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:60;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .cart-drawer-mask.show{opacity:1;pointer-events:auto;}
+  .cart-drawer{
+    position:absolute;left:0;right:0;bottom:0;background:#fff;
+    border-radius:18px 18px 0 0;z-index:61;transform:translateY(110%);
+    transition:transform .28s cubic-bezier(.32,.72,0,1);
+    max-height:72%;display:flex;flex-direction:column;
+    box-shadow:0 -8px 24px rgba(0,0,0,.12);
+  }
+  .cart-drawer.show{transform:translateY(0);}
+  .cart-drawer .d-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px 12px;border-bottom:.5px solid var(--sep);flex-shrink:0;
+  }
+  .cart-drawer .d-title{font-size:16px;font-weight:700;}
+  .cart-drawer .d-count{font-size:12px;color:var(--secondary);font-weight:400;margin-left:8px;}
+  .cart-drawer .d-close{font-size:22px;color:var(--tertiary);line-height:1;padding:0 4px;}
+  .cart-drawer .d-body{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 8px;}
+  .cart-drawer .d-item{
+    display:flex;align-items:center;gap:10px;padding:12px 0;
+    border-bottom:.5px solid #F2F2F7;
+  }
+  .cart-drawer .d-img{
+    width:56px;height:56px;border-radius:10px;background:var(--fill);
+    display:flex;align-items:center;justify-content:center;font-size:10px;
+    color:var(--secondary);text-align:center;padding:4px;flex:0 0 auto;
+  }
+  .cart-drawer .d-info{flex:1;min-width:0;}
+  .cart-drawer .d-name{font-size:13px;font-weight:600;line-height:1.35;}
+  .cart-drawer .d-price{font-size:14px;font-weight:700;margin-top:6px;}
+  .cart-drawer .d-foot-link{
+    text-align:center;color:var(--label);font-size:13px;font-weight:600;
+    padding:12px 0 4px;
+  }
+  .cart-drawer .d-bar{
+    display:flex;align-items:center;gap:12px;border-top:.5px solid var(--sep);
+    padding:12px 16px 16px;flex-shrink:0;background:#fff;
+  }
+  .cart-drawer .totals{flex:1;min-width:0;}
+  .cart-drawer .t-line{font-size:12px;line-height:1.45;color:var(--secondary);}
+  .cart-drawer .t-cash{font-size:18px;font-weight:700;color:var(--label);letter-spacing:-.3px;}
+  .cart-drawer .checkout-btn{
+    background:#1C1C1E;color:#fff;font-size:15px;font-weight:600;
+    border-radius:999px;height:42px;padding:0 28px;border:none;
+    display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
   }
 
   .stepper{
@@ -1002,17 +1130,65 @@ function cartBar(){
   const n = cartCount();
   const total = cartTotal();
   const empty = n === 0;
-  return `<div class="cart-bar">
-    <div class="cb-icon" onclick="${empty?"goTab('category')":"nav('cart')"}" role="button" aria-label="购物车">
+  /* 潮匠 cart-fab + 底部结算条（灰阶） */
+  return `
+  <button class="cart-fab" aria-label="购物车" onclick="${empty?"goTab('category')":"openCartDrawer()"}">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h2l2.2 10h9.6L19 7H6"/><circle cx="9" cy="18" r="1.4"/><circle cx="16" cy="18" r="1.4"/></svg>
+    ${empty?'':`<span class="fab-badge">${n}</span>`}
+  </button>
+  <div class="cart-bar">
+    <div class="cb-icon" onclick="${empty?"goTab('category')":"openCartDrawer()"}" role="button" aria-label="购物车明细">
       ${icons.cart}
       ${empty ? '' : `<span class="badge">${n}</span>`}
     </div>
-    <div class="info" onclick="${empty?"goTab('category')":"nav('cart')"}">
-      <div class="total">${empty ? '购物车是空的' : `已选 ${n} 件`}</div>
+    <div class="info" onclick="${empty?"goTab('category')":"openCartDrawer()"}">
+      <div class="total">${empty ? '购物车是空的' : `已选 ${n} 件 · 点击改数量`}</div>
       <div class="num">${empty ? '<span style="font-size:14px;font-weight:600;color:var(--secondary);">去逛逛</span>' : `<small>¥</small>${total.toFixed(2)}`}</div>
     </div>
-    <button class="btn ${empty?'is-empty':''}" onclick="${empty?"goTab('category')":"nav('cart')"}">${empty?'去选购':'去结算'}</button>
+    <button class="btn ${empty?'is-empty':''}" style="border-radius:999px;" onclick="${empty?"goTab('category')":"nav('cart')"}">${empty?'去选购':'去结算'}</button>
+  </div>
+  <div class="cart-drawer-mask" id="cartDrawerMask" onclick="closeCartDrawer()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="d-head">
+      <div><span class="d-title">购物车</span><span class="d-count">${n} 件</span></div>
+      <button class="d-close" onclick="closeCartDrawer()" aria-label="关闭">×</button>
+    </div>
+    <div class="d-body">
+      ${empty?`<div class="empty" style="padding:48px 0;">购物车是空的</div>`:
+      state.cart.map((it,idx)=>`
+        <div class="d-item">
+          <div class="check ${it.sel!==false?'on':''}" onclick="toggleCartSel(${idx});openCartDrawer()" style="width:20px;height:20px;border-radius:50%;border:1.5px solid ${it.sel!==false?'#1C1C1E':'#D1D1D6'};background:${it.sel!==false?'#1C1C1E':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;flex:0 0 auto;">${it.sel!==false?'✓':''}</div>
+          <div class="d-img">${it.name.split(' ')[0]}</div>
+          <div class="d-info">
+            <div class="d-name">${it.name}</div>
+            <div class="flex between items-c" style="margin-top:6px;">
+              <div class="d-price">¥${it.price}</div>
+              <div class="stepper">
+                <button onclick="chQty(${idx},-1);openCartDrawer()">−</button>
+                <div class="n">${it.qty}</div>
+                <button onclick="chQty(${idx},1);openCartDrawer()">+</button>
+              </div>
+            </div>
+          </div>
+        </div>`).join('')}
+      ${empty?'':`<div class="d-foot-link" onclick="closeCartDrawer();nav('cart')">查看全部 / 去购物车页 ›</div>`}
+    </div>
+    <div class="d-bar">
+      <div class="totals">
+        <div class="t-line">${empty?'暂无商品':`已选 ${state.cart.filter(i=>i.sel!==false).length} 件`}</div>
+        <div class="t-cash">¥${selectedTotal().toFixed(2)}</div>
+      </div>
+      <button class="checkout-btn" ${empty?'disabled style="opacity:.4"':''} onclick="${empty?"closeCartDrawer();goTab('category')":"closeCartDrawer();nav('cart')"}">${empty?'去选购':'去结算'}</button>
+    </div>
   </div>`;
+}
+function openCartDrawer(){
+  document.getElementById('cartDrawer')?.classList.add('show');
+  document.getElementById('cartDrawerMask')?.classList.add('show');
+}
+function closeCartDrawer(){
+  document.getElementById('cartDrawer')?.classList.remove('show');
+  document.getElementById('cartDrawerMask')?.classList.remove('show');
 }
 
 function setFulfill(v){
@@ -1078,16 +1254,20 @@ function screenCategory(){
           <span class="xs muted">${state.store} · 有货</span>
         </div>
         ${list.map(p=>`
-          <div class="list-item" onclick="openProduct('${p.id}')">
-            <div class="thumb">${p.name.split(' ')[0]}</div>
-            <div class="grow" style="flex:1;">
-              <div class="fw6" style="font-size:14px;line-height:1.3;">${p.name}</div>
-              <div class="xs muted mt8">${state.fulfill==='pickup'?'门店现货':'可配送'}</div>
-              <div class="flex between items-c mt8">
-                <div class="price">¥${p.price}</div>
-                <button class="btn sm" onclick="event.stopPropagation();addToCart('${p.id}','${p.name}')">加购</button>
+          <div class="tc-goods" onclick="openProduct('${p.id}')">
+            <div class="thumb">${p.name.split(' ')[0]}<br/>示意</div>
+            <div class="info">
+              <div class="title">${p.name}</div>
+              <div class="meta">
+                <span>${state.fulfill==='pickup'?'门店现货':'可配送'}</span>
+                <span>${state.store.slice(0,8)}…</span>
+              </div>
+              <div class="prices">
+                <span class="cash">¥${p.price}</span>
+                <span style="font-size:11px;color:var(--secondary);">每 1 元 = 1 积分</span>
               </div>
             </div>
+            <button class="add-btn" aria-label="加购" onclick="event.stopPropagation();addToCart('${p.id}','${p.name.replace(/'/g,'')}')">+</button>
           </div>`).join('')}
       </div>
     </div>
@@ -1694,41 +1874,64 @@ function screenPointsHistory(){
 }
 
 function screenExchange(){
+  const tabs = [
+    {id:'all', name:'全部'},
+    {id:'shop', name:'商超券'},
+    {id:'fuel', name:'加油券'},
+    {id:'eq', name:'权益'}
+  ];
+  const active = state.exchangeTab || 'all';
+  const shopCoupons = [
+    {id:'x1', name:'满 50 减 10 券', cost:500},
+    {id:'x2', name:'无门槛 5 元券', cost:300},
+    {id:'x3', name:'满 100 减 20 券', cost:900}
+  ];
+  const fuelCoupons = [
+    {id:'x4', name:'加油满 200 减 15', cost:800},
+    {id:'x5', name:'加油 10 元券', cost:600}
+  ];
+  const showShop = active==='all'||active==='shop';
+  const showFuel = active==='all'||active==='fuel';
+  const showEq = active==='all'||active==='eq';
+
   return `
   ${navBar('兑换商城')}
   <div class="content">
-    <div class="pad">
-      <div class="asset-card">
-        <div class="flex between items-c">
-          <div><div class="an">可用积分</div><div class="av">${state.points}</div></div>
-          <button class="btn sm secondary" onclick="nav('points-history')">明细</button>
+    <div class="pad" style="padding-bottom:100px;">
+      <!-- 潮匠积分横幅（灰阶实色，无渐变） -->
+      <div class="tc-points">
+        <div>
+          <div class="label">我的积分 <a href="javascript:void(0)" onclick="nav('points-history')">明细 ›</a></div>
+          <div class="num">${state.points}</div>
+          <div class="sub">看广告 / 完成任务 / 签到可得</div>
         </div>
+        <button class="mini-btn" onclick="nav('tasks')">赚积分</button>
       </div>
-      <div class="section-title">商超券</div>
-      ${[
-        {id:'x1', name:'满 50 减 10 券', cost:500},
-        {id:'x2', name:'无门槛 5 元券', cost:300},
-        {id:'x3', name:'满 100 减 20 券', cost:900}
-      ].map(c=>exchangeRow(c)).join('')}
 
-      <div class="section-title">加油券</div>
-      ${[
-        {id:'x4', name:'加油满 200 减 15', cost:800},
-        {id:'x5', name:'加油 10 元券', cost:600}
-      ].map(c=>exchangeRow(c, true)).join('')}
-
-      <div class="section-title">虚拟权益</div>
-      <div class="grid2">
-        ${equity.map(e=>`
-          <div class="card pad-card" style="margin:0;">
-            <div class="thumb" style="width:100%;height:64px;margin-bottom:8px;">${e.name}</div>
-            <div class="small fw6">${e.name}</div>
-            <div class="flex between items-c mt8">
-              <span class="xs">${e.cost} 分</span>
-              <button class="btn sm" onclick="redeem('${e.name}',${e.cost})">兑换</button>
-            </div>
-          </div>`).join('')}
+      <div class="tc-supply">
+        <span class="tag">商城</span>
+        <span class="txt">海量好物 · 积分兑换 · 积分不可提现</span>
       </div>
+
+      <div class="tc-tabs">
+        ${tabs.map(t=>`<button class="${active===t.id?'on':''}" onclick="state.exchangeTab='${t.id}';render()">${t.name}</button>`).join('')}
+      </div>
+      <div class="tc-hint">积分兑换约 300 分起 · 券可抵商超下单 / 加油到店核销</div>
+
+      ${showShop?`
+        <div class="section-title">商超券</div>
+        ${shopCoupons.map(c=>goodsCardMall(c, false)).join('')}
+      `:''}
+
+      ${showFuel?`
+        <div class="section-title">加油券</div>
+        ${fuelCoupons.map(c=>goodsCardMall(c, true)).join('')}
+      `:''}
+
+      ${showEq?`
+        <div class="section-title">虚拟权益</div>
+        ${equity.map(e=>goodsCardMall({id:e.id,name:e.name,cost:e.cost}, false, true)).join('')}
+      `:''}
 
       <div class="section-title">线下活动</div>
       <div class="card">
@@ -1739,6 +1942,28 @@ function screenExchange(){
           </div>`).join('')}
       </div>
     </div>
+  </div>`;
+}
+
+/* 潮匠 goods-card 灰阶版 */
+function goodsCardMall(c, isFuel, isEquity){
+  const cost = c.cost;
+  const meta = isFuel ? '到店核销' : (isEquity ? '第三方权益' : '下单自动抵扣');
+  return `
+  <div class="tc-goods" onclick="${isEquity?`redeem('${c.name.replace(/'/g,"")}',${cost})`:`redeem('${c.name.replace(/'/g,"")}',${cost},${!!isFuel})`}">
+    <div class="thumb">${isFuel?'加油':(isEquity?'权益':'券')}<br/>示意</div>
+    <div class="info">
+      <div class="title">${c.name}</div>
+      <div class="meta">
+        <span>${meta}</span>
+        <span>30 天有效</span>
+      </div>
+      <div class="prices">
+        <span class="points">${cost} <span style="font-size:11px;font-weight:500;">积分</span></span>
+        <span class="cash" style="font-size:12px;font-weight:500;color:var(--secondary);">约 ${meta.includes('加油')?'油站':'商城'}可用</span>
+      </div>
+    </div>
+    <button class="add-btn" aria-label="兑换" onclick="event.stopPropagation();${isEquity?`redeem('${c.name.replace(/'/g,"")}',${cost})`:`redeem('${c.name.replace(/'/g,"")}',${cost},${!!isFuel})`}">+</button>
   </div>`;
 }
 function exchangeRow(c, isFuel){
