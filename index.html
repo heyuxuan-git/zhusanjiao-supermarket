@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>珠三角超市 · App 框架原型</title>
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --grouped:#F2F2F7;
+    --fill:#E5E5EA;
+    --fill-2:#D1D1D6;
+    --sep:#C6C6C8;
+    --label:#1C1C1E;
+    --label2:#3C3C43;
+    --secondary:#8E8E93;
+    --tertiary:#AEAEB2;
+    --white:#FFFFFF;
+    --black:#000000;
+    --r-card:14px;
+    --r-btn:12px;
+    --r-sm:8px;
+    --pad:16px;
+    --tab-h:56px;
+    --nav-h:44px;
+    --status-h:44px;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font);
+    background:#E8E8ED;
+    color:var(--label);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+  }
+  button,input,select,textarea{font-family:inherit;}
+  button{cursor:pointer;border:none;background:none;padding:0;color:inherit;}
+
+  .stage{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+  }
+
+  /* ========== Phone shell — iPhone 13 mini (375×812pt) ========== */
+  .phone-wrap{position:relative;}
+  .phone{
+    /* device body ≈ screen + uniform bezel */
+    width:395px;
+    height:832px;
+    background:#0A0A0A;
+    border-radius:48px;
+    padding:10px;
+    box-shadow:
+      0 28px 60px rgba(0,0,0,.22),
+      0 0 0 1px #2C2C2E,
+      inset 0 0 0 1px #3A3A3C;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  /* inner screen = iPhone 13 mini logical resolution */
+  .screen{
+    flex:1;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg);
+    border-radius:38px;
+    overflow:hidden;
+    position:relative;
+    isolation:isolate;
+  }
+  .notch{
+    position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:126px;height:30px;background:#0A0A0A;border-radius:0 0 18px 18px;z-index:60;
+  }
+  .notch::after{
+    content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);
+    width:8px;height:8px;border-radius:50%;background:#1C1C1E;
+    box-shadow:inset 0 0 0 1.5px #2A2A2C;
+  }
+  .status-bar{
+    height:50px;flex:0 0 auto;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:end;
+    padding:0 18px 8px;
+    font-size:15px;font-weight:600;letter-spacing:-.2px;
+    background:transparent;z-index:55;position:relative;
+    color:var(--label);
+  }
+  .status-bar .time{
+    justify-self:start;
+    font-variant-numeric:tabular-nums;
+    padding-bottom:1px;
+    min-width:54px;
+  }
+  .status-bar .notch-slot{width:126px;height:30px;}
+  .status-bar .icons{
+    justify-self:end;
+    display:flex;align-items:center;gap:5px;
+    padding-bottom:2px;
+  }
+  .status-bar .icons svg{display:block;}
+  .status-bar .battery{
+    width:25px;height:12px;border:1.2px solid var(--label);border-radius:3.5px;
+    position:relative;opacity:.9;
+  }
+  .status-bar .battery::after{
+    content:"";position:absolute;right:-3.5px;top:3px;width:1.5px;height:5px;
+    background:var(--label);border-radius:0 1px 1px 0;opacity:.5;
+  }
+  .status-bar .battery i{
+    position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:calc(100% - 3px);
+    background:var(--label);border-radius:1.5px;display:block;
+  }
+
+  .app{
+    flex:1;min-height:0;display:flex;flex-direction:column;position:relative;
+    background:var(--grouped);overflow:hidden;
+  }
+
+  /* ========== Nav ========== */
+  .nav{
+    height:var(--nav-h);flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;background:rgba(249,249,249,.94);
+    border-bottom:.5px solid var(--sep);
+    padding:0 8px;z-index:30;
+  }
+  .nav .title{font-size:17px;font-weight:600;letter-spacing:-.2px;}
+  .nav .back{
+    position:absolute;left:4px;top:0;bottom:0;width:48px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--label);font-size:17px;
+  }
+  .nav .back svg{width:12px;height:20px;}
+  .nav .right{
+    position:absolute;right:12px;top:0;bottom:0;display:flex;align-items:center;gap:10px;
+    font-size:16px;color:var(--label);
+  }
+
+  /* ========== Content ========== */
+  .content{
+    flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;background:var(--grouped);
+    padding-bottom:20px;
+  }
+  .content::-webkit-scrollbar{width:0;}
+  .content.plain{background:var(--bg);}
+  .pad{padding:12px var(--pad) 24px;}
+
+  /* ========== Tab bar ========== */
+  .tabbar{
+    flex:0 0 auto;height:calc(var(--tab-h) + 18px);
+    background:rgba(249,249,249,.96);
+    border-top:.5px solid var(--sep);
+    display:flex;align-items:flex-start;padding-top:6px;
+    z-index:30;
+  }
+  .tabbar button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    color:var(--secondary);font-size:10px;font-weight:500;padding-top:2px;
+  }
+  .tabbar button.active{color:var(--black);font-weight:600;}
+  .tabbar .ic{width:26px;height:26px;display:block;}
+  .tabbar .badge{
+    position:absolute;top:0;right:10px;min-width:16px;height:16px;
+    background:var(--black);color:#fff;font-size:10px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;padding:0 4px;font-weight:600;
+  }
+  .tab-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
+
+  /* ========== iOS primitives ========== */
+  .card{
+    background:var(--white);border-radius:var(--r-card);
+    overflow:hidden;margin-bottom:12px;
+  }
+  .card.pad-card{padding:14px 16px;}
+  .section-title{
+    font-size:13px;font-weight:600;color:var(--secondary);
+    letter-spacing:.4px;margin:16px 4px 8px;text-transform:none;
+  }
+  .section-title:first-child{margin-top:4px;}
+  .row{
+    display:flex;align-items:center;gap:12px;
+    padding:13px 16px;background:var(--white);
+    border-bottom:.5px solid var(--sep);min-height:52px;
+    position:relative;
+  }
+  .row:last-child{border-bottom:none;}
+  .row.tappable:active{background:var(--fill);}
+  .row .grow{flex:1;min-width:0;}
+  .row .t{font-size:16px;line-height:1.25;color:var(--label);font-weight:400;}
+  .row .s{font-size:13px;color:var(--secondary);margin-top:3px;line-height:1.3;}
+  .row .v{font-size:15px;color:var(--secondary);text-align:right;max-width:55%;}
+  .chev, .row .chev{width:8px;height:14px;min-width:8px;flex:0 0 auto;opacity:.45;display:block;}
+  svg.chev{width:8px;height:14px;}
+  .row .icon-sq{
+    width:32px;height:32px;border-radius:8px;background:var(--fill);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    font-size:14px;font-weight:600;color:var(--label2);
+  }
+  .grouped{border-radius:var(--r-card);overflow:hidden;background:var(--white);}
+  .grouped .row:first-child{border-radius:var(--r-card) var(--r-card) 0 0;}
+  .grouped .row:last-child{border-radius:0 0 var(--r-card) var(--r-card);}
+
+  .btn{
+    display:flex;align-items:center;justify-content:center;
+    height:50px;border-radius:var(--r-btn);font-size:17px;font-weight:600;
+    background:var(--black);color:var(--white);width:100%;letter-spacing:.2px;
+  }
+  .btn:active{opacity:.85;}
+  .btn.secondary{background:var(--fill);color:var(--label);}
+  .btn.ghost{background:transparent;color:var(--label);border:1px solid var(--sep);height:44px;font-size:15px;}
+  .btn.sm{height:36px;font-size:14px;padding:0 14px;width:auto;border-radius:10px;}
+  .btn.block-danger{background:var(--white);color:#FF3B30;border:.5px solid var(--sep);}
+
+  .pill{
+    display:inline-flex;align-items:center;height:28px;padding:0 10px;
+    border-radius:14px;background:var(--fill);font-size:12px;font-weight:500;color:var(--label2);
+  }
+  .pill.dark{background:var(--black);color:#fff;}
+  .pill.outline{background:transparent;border:1px solid var(--sep);}
+
+  .seg{
+    display:flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px;
+  }
+  .seg button{
+    flex:1;height:32px;border-radius:8px;font-size:13px;font-weight:500;color:var(--label2);
+  }
+  .seg button.active{background:var(--white);color:var(--label);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+
+  .input{
+    width:100%;height:44px;border-radius:10px;background:var(--fill);
+    border:none;padding:0 14px;font-size:16px;color:var(--label);outline:none;
+  }
+  .input::placeholder{color:var(--tertiary);}
+  textarea.input{height:88px;padding:12px 14px;resize:none;line-height:1.4;}
+
+  .avatar{
+    width:56px;height:56px;border-radius:50%;background:var(--fill-2);
+    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:var(--label2);
+    flex:0 0 auto;
+  }
+  .thumb{
+    width:72px;height:72px;border-radius:10px;background:var(--fill);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:var(--secondary);text-align:center;padding:4px;line-height:1.25;
+    flex:0 0 auto;font-weight:500;
+  }
+  .thumb.lg{width:96px;height:96px;font-size:12px;}
+  .thumb.sm{width:48px;height:48px;font-size:10px;border-radius:8px;}
+
+  .banner{
+    border-radius:var(--r-card);background:var(--white);padding:16px;
+    display:flex;align-items:center;gap:12px;margin-bottom:12px;
+    border:.5px solid var(--sep);
+  }
+  .banner .bt{font-size:15px;font-weight:600;}
+  .banner .bs{font-size:12px;color:var(--secondary);margin-top:3px;}
+
+  .home-hero-banner{
+    position:relative;border-radius:16px;overflow:hidden;margin-bottom:12px;
+    background:linear-gradient(135deg,#1C1C1E 0%,#3A3A3C 55%,#5C5C66 100%);
+    color:#fff;min-height:132px;display:block;width:100%;text-align:left;
+  }
+  .home-hero-banner .hb-pad{padding:18px 16px 16px;display:flex;flex-direction:column;height:100%;min-height:132px;}
+  .home-hero-banner .hb-tag{
+    display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:11px;
+    background:rgba(255,255,255,.18);font-size:11px;font-weight:600;letter-spacing:.4px;width:fit-content;
+  }
+  .home-hero-banner .hb-title{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-top:10px;line-height:1.3;}
+  .home-hero-banner .hb-sub{font-size:12px;opacity:.78;margin-top:6px;line-height:1.45;}
+  .home-hero-banner .hb-cta{
+    margin-top:auto;padding-top:12px;display:flex;align-items:center;justify-content:space-between;
+  }
+  .home-hero-banner .hb-cta span{font-size:12px;opacity:.7;}
+  .home-hero-banner .hb-btn{
+    height:30px;padding:0 14px;border-radius:15px;background:#fff;color:#1C1C1E;
+    font-size:13px;font-weight:600;display:inline-flex;align-items:center;
+  }
+  .home-hero-banner .hb-dots{position:absolute;right:14px;top:16px;display:flex;gap:5px;}
+  .home-hero-banner .hb-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);}
+  .home-hero-banner .hb-dots i.on{background:#fff;width:14px;border-radius:3px;}
+
+  .home-search{
+    display:flex;align-items:center;gap:8px;width:100%;
+    height:44px;border-radius:12px;background:var(--fill);
+    padding:0 14px;margin-bottom:12px;color:var(--secondary);
+    font-size:15px;text-align:left;
+  }
+  .home-search:active{opacity:.85;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+
+  .tile{
+    background:var(--white);border-radius:12px;padding:12px 8px;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    text-align:center;
+  }
+  .tile:active{background:var(--fill);}
+  .tile .ti{
+    width:40px;height:40px;border-radius:12px;background:var(--fill);
+    display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:var(--label2);
+  }
+  .tile .tl{font-size:11px;color:var(--label);font-weight:500;line-height:1.25;}
+
+  .prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .prod{
+    background:var(--white);border-radius:12px;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .prod .ph{
+    height:110px;background:var(--fill);display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:var(--secondary);font-weight:500;text-align:center;padding:8px;
+  }
+  .prod .pb{padding:10px 10px 12px;display:flex;flex-direction:column;gap:4px;flex:1;}
+  .prod .pn{font-size:13px;font-weight:500;line-height:1.3;min-height:34px;}
+  .prod .pp{display:flex;align-items:baseline;justify-content:space-between;margin-top:auto;}
+  .prod .price{font-size:16px;font-weight:700;letter-spacing:-.3px;}
+  .prod .price small{font-size:11px;font-weight:600;}
+  .prod .add{
+    width:28px;height:28px;border-radius:50%;background:var(--black);color:#fff;
+    font-size:18px;font-weight:400;display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+
+  .task-card{
+    background:var(--white);border-radius:var(--r-card);padding:14px 16px;
+    display:flex;align-items:center;gap:12px;margin-bottom:10px;
+  }
+  .task-card .ti{
+    width:44px;height:44px;border-radius:12px;background:var(--fill);
+    display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex:0 0 auto;
+  }
+  .task-card .grow{flex:1;min-width:0;}
+  .task-card .tt{font-size:16px;font-weight:600;}
+  .task-card .ts{font-size:12px;color:var(--secondary);margin-top:3px;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+  .stat{
+    background:var(--white);border-radius:12px;padding:12px 8px;text-align:center;
+  }
+  .stat .n{font-size:20px;font-weight:700;letter-spacing:-.4px;}
+  .stat .l{font-size:11px;color:var(--secondary);margin-top:4px;}
+
+  .empty{
+    text-align:center;padding:48px 24px;color:var(--secondary);font-size:14px;
+  }
+  .empty .ei{
+    width:64px;height:64px;border-radius:50%;background:var(--fill);
+    margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px;
+  }
+
+  .badge-dot{
+    display:inline-flex;align-items:center;height:20px;padding:0 8px;
+    border-radius:10px;font-size:11px;font-weight:600;background:var(--fill);color:var(--label2);
+  }
+  .badge-dot.dark{background:var(--black);color:#fff;}
+
+  .notice{
+    background:var(--white);border-radius:12px;padding:12px 14px;
+    font-size:13px;color:var(--label2);line-height:1.5;border:.5px solid var(--sep);
+    margin-bottom:12px;
+  }
+  .notice strong{font-weight:600;color:var(--label);}
+
+  .map-ph{
+    height:180px;background:
+      linear-gradient(90deg, var(--fill) 1px, transparent 1px) 0 0/24px 24px,
+      linear-gradient(var(--fill) 1px, transparent 1px) 0 0/24px 24px,
+      var(--grouped);
+    border-radius:var(--r-card);position:relative;overflow:hidden;
+    border:.5px solid var(--sep);margin-bottom:12px;
+  }
+  .map-ph .pin{
+    position:absolute;width:28px;height:28px;border-radius:50%;
+    background:var(--black);color:#fff;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  .map-ph .me{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--black);
+  }
+
+  .charge-hero{
+    background:var(--white);border-radius:16px;padding:20px 16px;text-align:center;
+    margin-bottom:12px;border:.5px solid var(--sep);
+  }
+  .charge-hero .big{
+    font-size:48px;font-weight:700;letter-spacing:-1.5px;line-height:1;
+  }
+  .charge-hero .unit{font-size:14px;color:var(--secondary);font-weight:500;margin-left:4px;}
+  .charge-hero .meta{
+    display:flex;justify-content:center;gap:24px;margin-top:16px;
+  }
+  .charge-hero .meta div{text-align:center;}
+  .charge-hero .meta .mn{font-size:16px;font-weight:600;}
+  .charge-hero .meta .ml{font-size:11px;color:var(--secondary);margin-top:3px;}
+
+  .progress-track{
+    height:6px;background:var(--fill);border-radius:3px;overflow:hidden;margin:14px 0 8px;
+  }
+  .progress-fill{height:100%;background:var(--black);border-radius:3px;width:0;transition:width .6s ease;}
+
+  /* 底部购物栏：参考积分商城悬浮结算条 */
+  .cart-bar{
+    position:absolute;left:10px;right:10px;bottom:14px;
+    background:var(--white);border-radius:18px;
+    padding:8px 8px 8px 14px;
+    display:flex;align-items:center;gap:10px;
+    box-shadow:0 10px 28px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.06);
+    z-index:25;
+    min-height:56px;
+  }
+  .cart-bar .cb-icon{
+    width:40px;height:40px;border-radius:12px;background:var(--grouped);
+    display:flex;align-items:center;justify-content:center;position:relative;flex:0 0 auto;
+    color:var(--label);
+  }
+  .cart-bar .cb-icon .badge{
+    position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;
+    background:var(--black);color:#fff;font-size:10px;font-weight:700;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;border:2px solid var(--white);
+  }
+  .cart-bar .info{flex:1;min-width:0;}
+  .cart-bar .total{font-size:11px;color:var(--secondary);line-height:1.2;}
+  .cart-bar .num{font-size:20px;font-weight:700;letter-spacing:-.4px;line-height:1.15;color:var(--label);}
+  .cart-bar .num small{font-size:12px;font-weight:600;margin-right:1px;}
+  .cart-bar .btn{
+    width:auto;min-width:96px;padding:0 18px;height:40px;font-size:15px;
+    border-radius:12px;flex:0 0 auto;
+  }
+  .cart-bar .btn:disabled,.cart-bar .btn.is-empty{
+    background:var(--fill);color:var(--tertiary);
+  }
+
+  .stepper{
+    display:flex;align-items:center;gap:0;background:var(--fill);border-radius:8px;overflow:hidden;
+  }
+  .stepper button{
+    width:32px;height:28px;display:flex;align-items:center;justify-content:center;
+    font-size:16px;font-weight:500;color:var(--label);
+  }
+  .stepper .n{
+    min-width:28px;text-align:center;font-size:14px;font-weight:600;
+    background:var(--white);height:28px;line-height:28px;
+  }
+
+  .check{
+    width:22px;height:22px;border-radius:50%;border:1.5px solid var(--fill-2);
+    flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  }
+  .check.on{background:var(--black);border-color:var(--black);color:#fff;font-size:12px;font-weight:700;}
+
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+
+  /* Modal / sheet */
+  .sheet-mask{
+    position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:60;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .sheet-mask.show{opacity:1;pointer-events:auto;}
+  .sheet{
+    position:absolute;left:0;right:0;bottom:0;background:var(--grouped);
+    border-radius:16px 16px 0 0;z-index:61;transform:translateY(110%);
+    transition:transform .28s cubic-bezier(.32,.72,0,1);
+    max-height:78%;display:flex;flex-direction:column;
+    box-shadow:0 -8px 30px rgba(0,0,0,.12);
+  }
+  .sheet.show{transform:translateY(0);}
+  .sheet-handle{
+    width:36px;height:5px;background:var(--fill-2);border-radius:3px;margin:8px auto 4px;flex:0 0 auto;
+  }
+  .sheet-title{
+    text-align:center;font-size:16px;font-weight:600;padding:8px 16px 12px;
+    border-bottom:.5px solid var(--sep);background:rgba(249,249,249,.96);flex:0 0 auto;
+  }
+  .sheet-body{overflow-y:auto;padding:12px 16px 28px;flex:1;}
+
+  /* Ad sim modal */
+  .ad-overlay{
+    position:absolute;inset:0;background:rgba(0,0,0,.92);z-index:70;
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    color:#fff;padding:32px;text-align:center;
+  }
+  .ad-overlay.show{display:flex;}
+  .ad-frame{
+    width:100%;max-width:300px;border-radius:16px;background:#2C2C2E;
+    padding:32px 20px;margin-bottom:20px;border:1px solid #3A3A3C;
+  }
+  .ad-frame .label{font-size:11px;letter-spacing:1px;opacity:.55;margin-bottom:12px;}
+  .ad-frame .h{font-size:22px;font-weight:700;margin-bottom:8px;}
+  .ad-frame .p{font-size:13px;opacity:.7;line-height:1.5;}
+  .ad-count{font-size:14px;opacity:.75;margin-bottom:16px;font-variant-numeric:tabular-nums;}
+  .ad-reward{
+    font-size:15px;font-weight:600;background:#fff;color:#000;border-radius:12px;
+    height:44px;padding:0 28px;display:none;align-items:center;justify-content:center;
+  }
+
+  .toast{
+    position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.96);
+    background:rgba(0,0,0,.82);color:#fff;font-size:14px;font-weight:500;
+    padding:14px 22px;border-radius:12px;z-index:80;opacity:0;pointer-events:none;
+    transition:opacity .2s, transform .2s;max-width:80%;text-align:center;line-height:1.4;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+
+  .success-mark{
+    width:72px;height:72px;border-radius:50%;background:var(--black);color:#fff;
+    display:flex;align-items:center;justify-content:center;margin:32px auto 16px;font-size:32px;font-weight:600;
+  }
+
+  .divider{height:.5px;background:var(--sep);margin:0 16px;}
+  .mt8{margin-top:8px;}
+  .mt16{margin-top:16px;}
+  .mb8{margin-bottom:8px;}
+  .mb12{margin-bottom:12px;}
+  .text-c{text-align:center;}
+  .muted{color:var(--secondary);}
+  .small{font-size:13px;}
+  .xs{font-size:12px;}
+  .flex{display:flex;}
+  .items-c{align-items:center;}
+  .between{justify-content:space-between;}
+  .gap8{gap:8px;}
+  .gap12{gap:12px;}
+  .wrap{flex-wrap:wrap;}
+  .fw6{font-weight:600;}
+  .price-lg{font-size:28px;font-weight:700;letter-spacing:-.6px;}
+  .strike{text-decoration:line-through;color:var(--tertiary);font-weight:400;font-size:13px;}
+
+  .order-status{
+    font-size:14px;font-weight:600;text-align:right;
+  }
+  .order-card{
+    background:var(--white);border-radius:var(--r-card);margin-bottom:12px;overflow:hidden;
+  }
+  .order-card .oh{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;border-bottom:.5px solid var(--sep);font-size:13px;
+  }
+  .order-card .ob{padding:12px 16px;display:flex;gap:12px;}
+  .order-card .of{
+    padding:10px 16px 14px;display:flex;justify-content:flex-end;gap:8px;
+    border-top:.5px solid var(--sep);
+  }
+
+  .coupon{
+    background:var(--white);border-radius:12px;display:flex;overflow:hidden;
+    margin-bottom:10px;border:.5px solid var(--sep);
+  }
+  .coupon .cl{
+    width:88px;background:var(--black);color:#fff;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:12px 6px;flex:0 0 auto;
+  }
+  .coupon .cl .amt{font-size:22px;font-weight:700;letter-spacing:-.5px;}
+  .coupon .cl .amt small{font-size:12px;font-weight:600;}
+  .coupon .cl .cond{font-size:10px;opacity:.75;margin-top:2px;text-align:center;}
+  .coupon .cr{flex:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+  .coupon .cr .ct{font-size:15px;font-weight:600;}
+  .coupon .cr .cs{font-size:12px;color:var(--secondary);}
+  .coupon .cr .cd{font-size:11px;color:var(--tertiary);}
+  .coupon .ca{
+    width:76px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    border-left:.5px dashed var(--sep);
+  }
+
+  .asset-card{
+    background:var(--white);border-radius:var(--r-card);padding:18px 16px;
+    margin-bottom:12px;border:.5px solid var(--sep);
+  }
+  .asset-card .an{font-size:13px;color:var(--secondary);}
+  .asset-card .av{font-size:36px;font-weight:700;letter-spacing:-1px;margin-top:4px;}
+
+  /* 购物页：与其它页同宽（占满内容区） */
+  .content.cat-page{
+    padding:0;overflow:hidden;background:var(--grouped);
+    display:flex;flex-direction:column;
+  }
+  .cat-toolbar{
+    flex:0 0 auto;padding:10px 16px 8px;background:var(--grouped);
+    border-bottom:.5px solid transparent;
+  }
+  .cat-layout{
+    flex:1;min-height:0;display:flex;width:100%;min-width:100%;
+  }
+  .cat-side{
+    width:88px;flex:0 0 88px;background:var(--grouped);overflow-y:auto;
+    border-right:.5px solid var(--sep);
+  }
+  .cat-side button{
+    width:100%;padding:16px 6px;font-size:13px;color:var(--secondary);
+    text-align:center;border-left:3px solid transparent;
+  }
+  .cat-side button.active{
+    background:var(--white);color:var(--label);font-weight:600;border-left-color:var(--black);
+  }
+  .cat-main{
+    flex:1;min-width:0;overflow-y:auto;background:var(--white);
+    padding:12px 14px 88px;
+  }
+
+  .list-item{
+    display:flex;gap:12px;padding:12px 0;border-bottom:.5px solid var(--sep);align-items:center;
+  }
+  .list-item:last-child{border-bottom:none;}
+
+  .hint{
+    display:none;
+  }
+
+  @media (max-width:480px){
+    body{padding:12px 8px;align-items:flex-start;}
+    .phone{
+      width:100%;
+      max-width:395px;
+      height:min(832px, calc(100vh - 24px));
+      border-radius:40px;
+      padding:8px;
+    }
+    .screen{border-radius:32px;}
+    .notch{width:110px;height:26px;border-radius:0 0 14px 14px;}
+    .status-bar .notch-slot{width:110px;height:26px;}
+  }
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- ========== PHONE — iPhone 13 mini 375×812 ========== -->
+  <div class="phone-wrap">
+    <div class="phone" id="phone">
+      <div class="screen">
+        <div class="notch" aria-hidden="true"></div>
+        <div class="status-bar" aria-hidden="true">
+          <span class="time">9:41</span>
+          <span class="notch-slot"></span>
+          <div class="icons">
+            <!-- cellular -->
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor">
+              <rect x="0" y="8" width="3" height="4" rx="0.8"/>
+              <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.8"/>
+              <rect x="9" y="3" width="3" height="9" rx="0.8"/>
+              <rect x="13.5" y="0.5" width="3" height="11.5" rx="0.8"/>
+            </svg>
+            <!-- wifi -->
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+              <path d="M8 11.2l2.2-2.5a3.4 3.4 0 00-4.4 0L8 11.2z"/>
+              <path d="M8 6.2c1.6 0 3.1.6 4.2 1.7l1.4-1.6A8 8 0 008 4a8 8 0 00-5.6 2.3l1.4 1.6A6 6 0 018 6.2z" opacity=".95"/>
+              <path d="M8 1.2c2.7 0 5.2 1 7.1 2.8L16 2.6A11.6 11.6 0 008 0 11.6 11.6 0 000 2.6l.9 1.4A10 10 0 018 1.2z" opacity=".95"/>
+            </svg>
+            <span class="battery"><i></i></span>
+          </div>
+        </div>
+
+        <div class="app" id="app">
+          <div id="screenHost" style="flex:1;min-height:0;display:flex;flex-direction:column;"></div>
+
+          <div class="sheet-mask" id="sheetMask" onclick="closeSheet()"></div>
+          <div class="sheet" id="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title" id="sheetTitle">选择</div>
+            <div class="sheet-body" id="sheetBody"></div>
+          </div>
+
+          <div class="ad-overlay" id="adOverlay">
+            <div class="ad-frame">
+              <div class="label">激励视频广告 · 模拟</div>
+              <div class="h" id="adTitle">品牌广告位</div>
+              <div class="p" id="adDesc">观看完整视频可获得积分奖励。此为框架示意，上线接入穿山甲/优量汇等联盟 SDK。</div>
+            </div>
+            <div class="ad-count" id="adCount">剩余 3 秒</div>
+            <div class="ad-reward" id="adReward" onclick="claimAdReward()">领取 +10 积分</div>
+          </div>
+
+          <div class="toast" id="toast"></div>
+        </div>
+
+        <div class="tabbar" id="tabbar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   State
+========================================================= */
+const state = {
+  tab: 'home',
+  stack: [],           // screens above tab root
+  store: '深圳南山旗舰店',
+  fulfill: 'pickup',   // pickup | delivery
+  cart: [
+    {id:'p1', name:'有机菜心 300g', price:6.8, qty:1, cat:'蔬菜'},
+    {id:'p2', name:'鲜牛奶 1L', price:12.5, qty:2, cat:'乳品'}
+  ],
+  points: 128,
+  pointsToday: 0,
+  adsWatched: 0,
+  coupons: [
+    {id:'c1', amt:10, cond:'满 50 可用', name:'商超满减券', exp:'2025-12-31', type:'shop'},
+    {id:'c2', amt:5, cond:'无门槛', name:'通用代金券', exp:'2025-11-30', type:'cash'}
+  ],
+  fuelCoupons: [],
+  orders: [
+    {id:'SO20250923001', type:'商超', status:'待提货', statusKey:'pickup', total:31.8, store:'深圳南山旗舰店', time:'今天 14:20', items:'有机菜心×1、鲜牛奶×2'},
+    {id:'CH20250922088', type:'充电', status:'已完成', statusKey:'done', total:42.6, store:'驿能·南山科技园站', time:'昨天 18:05', items:'充电 38.2 度'}
+  ],
+  addresses: [
+    {id:'a1', name:'张三', phone:'138****8888', addr:'深圳市南山区粤海街道科技园南路 18 号', def:true},
+    {id:'a2', name:'张三', phone:'138****8888', addr:'深圳市福田区车公庙泰然九路 2 号', def:false}
+  ],
+  selectedAddr: 'a1',
+  selectedCoupon: null,
+  usePoints: false,
+  charging: false,
+  chargeKwh: 0,
+  chargeCost: 0,
+  chargeTimer: null,
+  activityJoined: false,
+  cat: '蔬菜',
+  product: null,
+  orderPayDemo: null
+};
+
+const products = {
+  '蔬菜': [
+    {id:'p1', name:'有机菜心 300g', price:6.8, old:8.5, unit:'约'},
+    {id:'v2', name:'本地小白菜 400g', price:4.5},
+    {id:'v3', name:'西红柿 500g', price:5.9},
+    {id:'v4', name:'土豆 1kg', price:6.2}
+  ],
+  '水果': [
+    {id:'f1', name:'赣南脐橙 4粒', price:15.8},
+    {id:'f2', name:'红富士苹果 4粒', price:19.9},
+    {id:'f3', name:'香蕉 1kg', price:7.5}
+  ],
+  '肉禽蛋': [
+    {id:'m1', name:'鲜鸡蛋 10枚', price:12.8},
+    {id:'m2', name:'鸡胸肉 300g', price:16.5},
+    {id:'m3', name:'猪瘦肉 400g', price:22.0}
+  ],
+  '乳品': [
+    {id:'p2', name:'鲜牛奶 1L', price:12.5},
+    {id:'d2', name:'原味酸奶 4杯', price:16.9},
+    {id:'d3', name:'儿童奶 125ml×6', price:19.9}
+  ],
+  '粮油': [
+    {id:'g1', name:'五常大米 5kg', price:49.9},
+    {id:'g2', name:'花生油 900ml', price:32.8},
+    {id:'g3', name:'生抽 500ml', price:12.9}
+  ],
+  '休闲': [
+    {id:'s1', name:'薯片 原味', price:8.5},
+    {id:'s2', name:'每日坚果', price:29.9},
+    {id:'s3', name:'苏打饼干', price:11.2}
+  ]
+};
+
+const catList = ['蔬菜','水果','肉禽蛋','乳品','粮油','休闲'];
+
+const stations = [
+  {id:'st1', name:'驿能·南山科技园站', dist:'0.8km', free:'12/20', price:'1.28', addr:'南山区科苑路 15 号'},
+  {id:'st2', name:'驿能·后海金融中心', dist:'2.1km', free:'5/16', price:'1.35', addr:'南山区滨海大道 3001 号'},
+  {id:'st3', name:'驿能·宝安中心站', dist:'6.4km', free:'18/24', price:'1.18', addr:'宝安区新湖路 99 号'}
+];
+
+const gasStations = [
+  {id:'g1', name:'中石化·南山大道站', dist:'1.2km', brand:'石化', oil:'7.89'},
+  {id:'g2', name:'中石油·滨海大道站', dist:'3.0km', brand:'石油', oil:'7.92'},
+  {id:'g3', name:'驿能合作·科技南站', dist:'1.8km', brand:'合作', oil:'7.79'}
+];
+
+const activities = [
+  {id:'act1', name:'周末亲子烘焙课', time:'本周六 14:00', place:'南山旗舰店 2F', cost:20, left:8},
+  {id:'act2', name:'新能源车主充电日', time:'下周日 10:00', place:'驿能·南山科技园站', cost:30, left:15},
+  {id:'act3', name:'生鲜试吃会', time:'本周日 11:00', place:'福田车公庙店', cost:10, left:5}
+];
+
+const equity = [
+  {id:'e1', name:'视频会员周卡', cost:45},
+  {id:'e2', name:'话费 10 元', cost:80},
+  {id:'e3', name:'咖啡买一送一券', cost:25},
+  {id:'e4', name:'洗车券', cost:35}
+];
+
+/* =========================================================
+   Icons (stroke-style, simple)
+========================================================= */
+const icons = {
+  home:'<svg class="ic" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11.5L13 4l9 7.5V21a1 1 0 01-1 1h-5v-6h-6v6H5a1 1 0 01-1-1v-9.5z"/></svg>',
+  grid:'<svg class="ic" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="7.5" height="7.5" rx="1.5"/><rect x="14.5" y="4" width="7.5" height="7.5" rx="1.5"/><rect x="4" y="14.5" width="7.5" height="7.5" rx="1.5"/><rect x="14.5" y="14.5" width="7.5" height="7.5" rx="1.5"/></svg>',
+  gift:'<svg class="ic" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="18" height="12" rx="2"/><path d="M4 14h18M13 10v12M13 10c-2.5-4-6-4-6-1.5S10 10 13 10zm0 0c2.5-4 6-4 6-1.5S16 10 13 10z"/></svg>',
+  bolt:'<svg class="ic" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 3L5 15h7l-1 8 9-13h-7l0-7z"/></svg>',
+  user:'<svg class="ic" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="13" cy="9" r="4"/><path d="M5 22c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 1l6 6-6 6"/></svg>',
+  back:'<svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 1L2 10l8 9"/></svg>',
+  search:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>',
+  cart:'<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4h2l2.2 10h9.6L19 7H6"/><circle cx="9" cy="18" r="1.4"/><circle cx="16" cy="18" r="1.4"/></svg>'
+};
+
+/* =========================================================
+   Navigation
+========================================================= */
+function cartCount(){ return state.cart.reduce((s,i)=>s+i.qty,0); }
+function cartTotal(){ return state.cart.reduce((s,i)=>s+i.price*i.qty,0); }
+
+function goTab(tab){
+  state.tab = tab;
+  state.stack = [];
+  render();
+}
+function nav(screen, payload){
+  state.stack.push({screen, payload});
+  render();
+}
+function back(){
+  state.stack.pop();
+  render();
+}
+function replace(screen, payload){
+  if(state.stack.length) state.stack[state.stack.length-1] = {screen, payload};
+  else state.stack.push({screen, payload});
+  render();
+}
+function resetTo(tab){
+  state.tab = tab;
+  state.stack = [];
+  render();
+}
+
+/* =========================================================
+   UI helpers
+========================================================= */
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 1800);
+}
+function openSheet(title, bodyHtml){
+  document.getElementById('sheetTitle').textContent = title;
+  document.getElementById('sheetBody').innerHTML = bodyHtml;
+  document.getElementById('sheet').classList.add('show');
+  document.getElementById('sheetMask').classList.add('show');
+}
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('show');
+  document.getElementById('sheetMask').classList.remove('show');
+}
+
+function navBar(title, opts={}){
+  const showBack = opts.back !== false && state.stack.length > 0;
+  const right = opts.right || '';
+  return `<div class="nav">
+    ${showBack ? `<button class="back" onclick="back()" aria-label="返回">${icons.back}</button>` : ''}
+    <div class="title">${title}</div>
+    ${right ? `<div class="right">${right}</div>` : ''}
+  </div>`;
+}
+
+function tabbarButtons(){
+  const tabs = [
+    ['home','首页',icons.home],
+    ['category','购物',icons.grid],
+    ['tasks','积分任务',icons.gift],
+    ['energy','能源',icons.bolt],
+    ['profile','我的',icons.user]
+  ];
+  return tabs.map(([k,l,ic])=>`
+    <button class="${state.tab===k?'active':''}" onclick="goTab('${k}')" style="position:relative;">
+      ${ic}<span>${l}</span>
+      ${k==='tasks' && state.pointsToday>0 ? `<span class="badge" style="top:-2px;right:18px;">${state.pointsToday}</span>`:''}
+    </button>`).join('');
+}
+
+/* =========================================================
+   Screens
+========================================================= */
+function screenHome(){
+  return `
+  <div class="content" id="content" style="padding-top:8px;">
+    <div class="pad" style="padding-top:4px;">
+      <!-- 搜索独占一行 -->
+      <button class="home-search" onclick="nav('search')">
+        ${icons.search}
+        <span>搜索商品、品牌</span>
+      </button>
+
+      <!-- 顶部 Banner：活动 / 最新商品 -->
+      <button class="home-hero-banner" onclick="nav('activities')">
+        <div class="hb-pad">
+          <span class="hb-tag">本周活动</span>
+          <div class="hb-title">周末亲子烘焙课<br/>积分抵报名费</div>
+          <div class="hb-sub">本周六 14:00 · 南山旗舰店 2F · 余位 8</div>
+          <div class="hb-cta">
+            <span>也可切换查看最新到货</span>
+            <span class="hb-btn">立即参与</span>
+          </div>
+        </div>
+        <div class="hb-dots"><i class="on"></i><i></i><i></i></div>
+      </button>
+
+      <!-- 门店 + 履约 -->
+      <div class="card pad-card" style="margin-bottom:12px;">
+        <div class="flex between items-c" style="margin-bottom:12px;">
+          <button class="flex items-c gap8" onclick="openStoreSheet()" style="text-align:left;">
+            <span class="pill dark" style="font-size:11px;">门店</span>
+            <span class="fw6" style="font-size:15px;">${state.store}</span>
+            ${icons.chev}
+          </button>
+          <span class="xs muted">定位深圳</span>
+        </div>
+        <div class="seg">
+          <button class="${state.fulfill==='pickup'?'active':''}" onclick="setFulfill('pickup')">到店自提</button>
+          <button class="${state.fulfill==='delivery'?'active':''}" onclick="setFulfill('delivery')">配送到家</button>
+        </div>
+        <div class="xs muted mt8">${state.fulfill==='pickup' ? '下单后凭提货码到店取货 · 今日营业 08:00–22:00' : '满 39 免运费 · 预计 45 分钟送达'}</div>
+      </div>
+
+      <!-- 金刚区：仅 8 个核心入口；订单/地址/券等在「我的」 -->
+      <div class="grid4" style="margin-bottom:14px;gap:10px;">
+        ${[
+          ['购物',"goTab('category')",'购'],
+          ['积分任务',"goTab('tasks')",'积'],
+          ['充电',"openEnergyTab('charge')",'充'],
+          ['加油',"openEnergyTab('fuel')",'油'],
+          ['兑换',"nav('exchange')",'兑'],
+          ['活动',"nav('activities')",'活'],
+          ['赚积分',"nav('ad-wall')",'广'],
+          ['我的',"goTab('profile')",'我']
+        ].map(([l,fn,ic])=>`
+          <button class="tile" onclick="${fn}" style="padding:12px 6px;">
+            <div class="ti" style="width:40px;height:40px;border-radius:12px;font-size:14px;">${ic}</div>
+            <div class="tl">${l}</div>
+          </button>`).join('')}
+      </div>
+
+      <div class="section-title">今日推荐</div>
+      <div class="prod-grid" style="margin-bottom:14px;">
+        ${[...products['蔬菜'], ...products['乳品']].slice(0,4).map(p=>prodCard(p)).join('')}
+      </div>
+
+      <div class="section-title">运营位（副广 Feed）</div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="row tappable" onclick="nav('ad-wall')">
+          <div class="icon-sq">AD</div>
+          <div class="grow"><div class="t">品牌副广 · 信息流 1</div><div class="s">首页 feed 广告位 · 按曝光结算</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="nav('ad-wall')">
+          <div class="icon-sq">AD</div>
+          <div class="grow"><div class="t">品牌副广 · 信息流 2</div><div class="s">任务页 / 结算页可复用同组件</div></div>
+          ${icons.chev}
+        </div>
+      </div>
+
+      <div class="section-title">附近活动</div>
+      <div class="card">
+        ${activities.slice(0,2).map(a=>`
+          <div class="row tappable" onclick="nav('activity-detail',{id:'${a.id}'})">
+            <div class="icon-sq">活</div>
+            <div class="grow"><div class="t">${a.name}</div><div class="s">${a.time} · ${a.place}</div></div>
+            <span class="pill">${a.cost} 积分</span>
+          </div>`).join('')}
+      </div>
+
+      <div class="notice mt8"><strong>框架说明：</strong>首页不展示购物车浮层；购物车入口在「购物」页与商品详情。价格/库存以所选门店为准。</div>
+    </div>
+  </div>`;
+}
+
+function prodCard(p){
+  return `<div class="prod" onclick="openProduct('${p.id}')">
+    <div class="ph">${p.name.split(' ')[0]}<br/>示意</div>
+    <div class="pb">
+      <div class="pn">${p.name}</div>
+      <div class="pp">
+        <div class="price"><small>¥</small>${p.price}</div>
+        <button class="add" onclick="event.stopPropagation();addToCart('${p.id}','${p.name.replace(/'/g,'')}')" aria-label="加购">+</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function cartBar(){
+  const n = cartCount();
+  const total = cartTotal();
+  const empty = n === 0;
+  return `<div class="cart-bar">
+    <div class="cb-icon" onclick="${empty?"goTab('category')":"nav('cart')"}" role="button" aria-label="购物车">
+      ${icons.cart}
+      ${empty ? '' : `<span class="badge">${n}</span>`}
+    </div>
+    <div class="info" onclick="${empty?"goTab('category')":"nav('cart')"}">
+      <div class="total">${empty ? '购物车是空的' : `已选 ${n} 件`}</div>
+      <div class="num">${empty ? '<span style="font-size:14px;font-weight:600;color:var(--secondary);">去逛逛</span>' : `<small>¥</small>${total.toFixed(2)}`}</div>
+    </div>
+    <button class="btn ${empty?'is-empty':''}" onclick="${empty?"goTab('category')":"nav('cart')"}">${empty?'去选购':'去结算'}</button>
+  </div>`;
+}
+
+function setFulfill(v){
+  state.fulfill = v;
+  render();
+  toast(v==='pickup'?'已切换到店自提':'已切换配送到家');
+}
+
+function openStoreSheet(){
+  const stores = ['深圳南山旗舰店','深圳福田车公庙店','深圳宝安中心店','深圳龙华壹方城店'];
+  openSheet('选择门店', stores.map(s=>`
+    <div class="row tappable" onclick="selectStore('${s}')">
+      <div class="grow"><div class="t">${s}</div><div class="s">${s.includes('南山')?'0.8km · 有货率 98%':s.includes('福田')?'3.2km · 有货率 96%':'5km+ · 有货率 94%'}</div></div>
+      ${state.store===s?'<span class="fw6">✓</span>':''}
+    </div>`).join(''));
+}
+function selectStore(s){
+  state.store=s; closeSheet(); render(); toast('已切换 '+s);
+}
+
+function openProduct(id){
+  let found=null;
+  for(const k of Object.keys(products)){
+    found = products[k].find(p=>p.id===id) || found;
+  }
+  if(!found) return;
+  state.product = found;
+  nav('product');
+}
+
+function addToCart(id, name){
+  let found=null, cat='';
+  for(const k of Object.keys(products)){
+    const hit = products[k].find(p=>p.id===id);
+    if(hit){found=hit;cat=k;}
+  }
+  if(!found) found={id, name, price:9.9};
+  const ex = state.cart.find(i=>i.id===id);
+  if(ex) ex.qty++;
+  else state.cart.push({id, name:found.name, price:found.price, qty:1, cat});
+  toast('已加入购物车');
+  render();
+}
+
+function screenCategory(){
+  const list = products[state.cat] || [];
+  return `
+  ${navBar('购物', {back:false, right:`<button onclick="nav('cart')" aria-label="购物车">${icons.cart}</button>`})}
+  <div class="content cat-page">
+    <div class="cat-toolbar">
+      <button class="home-search" style="margin-bottom:0;" onclick="nav('search')">
+        ${icons.search}
+        <span>在购物中搜索商品</span>
+      </button>
+    </div>
+    <div class="cat-layout">
+      <div class="cat-side">
+        ${catList.map(c=>`<button class="${state.cat===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
+      </div>
+      <div class="cat-main">
+        <div class="flex between items-c" style="margin:2px 2px 10px;">
+          <span class="fw6" style="font-size:16px;">${state.cat}</span>
+          <span class="xs muted">${state.store} · 有货</span>
+        </div>
+        ${list.map(p=>`
+          <div class="list-item" onclick="openProduct('${p.id}')">
+            <div class="thumb">${p.name.split(' ')[0]}</div>
+            <div class="grow" style="flex:1;">
+              <div class="fw6" style="font-size:14px;line-height:1.3;">${p.name}</div>
+              <div class="xs muted mt8">${state.fulfill==='pickup'?'门店现货':'可配送'}</div>
+              <div class="flex between items-c mt8">
+                <div class="price">¥${p.price}</div>
+                <button class="btn sm" onclick="event.stopPropagation();addToCart('${p.id}','${p.name}')">加购</button>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+    ${cartBar()}
+  </div>`;
+}
+function setCat(c){ state.cat=c; render(); }
+
+function screenSearch(){
+  return `
+  ${navBar('搜索')}
+  <div class="content plain">
+    <div class="pad" style="background:var(--grouped);min-height:100%;">
+      <div class="flex gap8 mb12">
+        <input class="input" id="searchInput" placeholder="搜索商品、品牌" autofocus />
+        <button class="btn" style="width:64px;height:44px;font-size:15px;" onclick="doSearch()">搜索</button>
+      </div>
+      <div class="section-title">热门搜索</div>
+      <div class="flex wrap gap8 mb12">
+        ${['牛奶','鸡蛋','菜心','大米','酸奶','苹果'].map(k=>`<button class="pill" onclick="fillSearch('${k}')">${k}</button>`).join('')}
+      </div>
+      <div class="section-title">搜索历史</div>
+      <div class="grouped">
+        <div class="row tappable" onclick="fillSearch('有机菜心')"><div class="grow"><div class="t">有机菜心</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="fillSearch('鲜牛奶')"><div class="grow"><div class="t">鲜牛奶</div></div>${icons.chev}</div>
+      </div>
+      <div id="searchResult" class="mt16"></div>
+    </div>
+  </div>`;
+}
+function fillSearch(k){
+  const el = document.getElementById('searchInput');
+  if(el) el.value = k;
+  doSearch();
+}
+function doSearch(){
+  const q = (document.getElementById('searchInput')?.value||'').trim();
+  const box = document.getElementById('searchResult');
+  if(!box) return;
+  if(!q){ box.innerHTML=''; return; }
+  const all = Object.values(products).flat().filter(p=>p.name.includes(q)||q.length===0);
+  if(!all.length){
+    box.innerHTML = `<div class="empty"><div class="ei">搜</div>未找到「${q}」相关商品</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="section-title">共 ${all.length} 个结果</div><div class="grouped">${all.map(p=>`
+    <div class="row tappable" onclick="openProduct('${p.id}')">
+      <div class="thumb sm">${p.name.split(' ')[0]}</div>
+      <div class="grow"><div class="t">${p.name}</div><div class="s">¥${p.price}</div></div>
+      <button class="btn sm" onclick="event.stopPropagation();addToCart('${p.id}','${p.name}')">加购</button>
+    </div>`).join('')}</div>`;
+}
+
+function screenProduct(){
+  const p = state.product || products['蔬菜'][0];
+  return `
+  ${navBar('商品详情', {right:`<button onclick="nav('cart')">${icons.cart}</button>`})}
+  <div class="content">
+    <div class="pad">
+      <div class="thumb lg" style="width:100%;height:220px;border-radius:14px;margin-bottom:14px;font-size:14px;">${p.name}<br/>商品主图示意</div>
+      <div class="card pad-card" style="margin-bottom:10px;">
+        <div class="flex between items-c">
+          <div class="price-lg">¥${p.price}</div>
+          <span class="pill">${state.fulfill==='pickup'?'自提有货':'可配送'}</span>
+        </div>
+        <div class="fw6 mt8" style="font-size:18px;line-height:1.35;">${p.name}</div>
+        <div class="xs muted mt8">${state.store} · 库存 32 件（示意）</div>
+      </div>
+      <div class="card">
+        <div class="row"><div class="grow"><div class="t">配送/自提</div></div><div class="v">${state.fulfill==='pickup'?'到店自提':'配送到家'}</div></div>
+        <div class="row"><div class="grow"><div class="t">积分</div></div><div class="v">每 1 元 = 1 积分</div></div>
+        <div class="row"><div class="grow"><div class="t">服务</div></div><div class="v">坏单包退 · 冷链配送</div></div>
+      </div>
+      <div class="notice">下单结算时可勾选<strong>优惠券</strong>与<strong>积分抵扣</strong>，形成「广告赚分 → 消费用分」闭环。</div>
+      <div style="height:56px;"></div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:10px;background:rgba(249,249,249,.97);border-top:.5px solid var(--sep);">
+      <button class="btn secondary" style="flex:1;" onclick="addToCart('${p.id}','${p.name}')">加入购物车</button>
+      <button class="btn" style="flex:1.2;" onclick="addToCart('${p.id}','${p.name}');nav('cart')">立即购买</button>
+    </div>
+  </div>`;
+}
+
+function screenCart(){
+  const total = cartTotal();
+  return `
+  ${navBar('购物车', {right: state.cart.length?`<button onclick="clearCart()" style="color:#8E8E93;font-size:15px;">清空</button>`:''})}
+  <div class="content">
+    <div class="pad" style="padding-bottom:100px;">
+      <div class="notice">
+        <strong>${state.fulfill==='pickup'?'到店自提':'配送到家'}</strong> · ${state.store}
+        <button style="margin-left:8;color:#000;font-weight:600;font-size:13px;" onclick="goTab('home')">修改</button>
+      </div>
+      ${state.cart.length===0 ? `
+        <div class="empty"><div class="ei">车</div>购物车是空的
+          <div class="mt16"><button class="btn secondary" style="width:160px;margin:0 auto;" onclick="goTab('category')">去逛逛</button></div>
+        </div>` : `
+        <div class="card">
+          ${state.cart.map((it,idx)=>`
+            <div class="row" style="align-items:flex-start;">
+              <div class="check ${it.sel!==false?'on':''}" onclick="toggleCartSel(${idx})">${it.sel!==false?'✓':''}</div>
+              <div class="thumb sm">${it.name.split(' ')[0]}</div>
+              <div class="grow">
+                <div class="t" style="font-size:14px;">${it.name}</div>
+                <div class="s">${it.cat||'商品'} · ${state.fulfill==='pickup'?'门店发货':'冷链配送'}</div>
+                <div class="flex between items-c mt8">
+                  <div class="price">¥${it.price}</div>
+                  <div class="stepper">
+                    <button onclick="chQty(${idx},-1)">−</button>
+                    <div class="n">${it.qty}</div>
+                    <button onclick="chQty(${idx},1)">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div class="card pad-card">
+          <div class="flex between small mb8"><span class="muted">商品金额</span><span>¥${total.toFixed(2)}</span></div>
+          <div class="flex between small mb8"><span class="muted">配送费</span><span>${state.fulfill==='delivery'?(total>=39?'¥0.00':'¥5.00'):'¥0.00'}</span></div>
+          <div class="flex between small fw6" style="font-size:15px;padding-top:8px;border-top:.5px solid var(--sep);"><span>合计</span><span>¥${(state.fulfill==='delivery'&&total<39?total+5:total).toFixed(2)}</span></div>
+        </div>
+      `}
+    </div>
+    ${state.cart.length?`
+    <div style="position:absolute;left:0;right:0;bottom:0;background:rgba(249,249,249,.97);border-top:.5px solid var(--sep);padding:12px 16px;display:flex;align-items:center;gap:12px;">
+      <div style="flex:1;">
+        <div class="xs muted">已选 ${state.cart.filter(i=>i.sel!==false).length} 件</div>
+        <div class="price-lg" style="font-size:22px;">¥${selectedTotal().toFixed(2)}</div>
+      </div>
+      <button class="btn" style="width:130px;" onclick="startCheckout()">去结算</button>
+    </div>`:''}
+  </div>`;
+}
+function selectedTotal(){
+  return state.cart.filter(i=>i.sel!==false).reduce((s,i)=>s+i.price*i.qty,0);
+}
+function toggleCartSel(i){
+  state.cart[i].sel = state.cart[i].sel===false;
+  render();
+}
+function chQty(i,d){
+  state.cart[i].qty += d;
+  if(state.cart[i].qty<=0) state.cart.splice(i,1);
+  render();
+}
+function clearCart(){ state.cart=[]; render(); toast('购物车已清空'); }
+
+function startCheckout(){
+  if(!state.cart.filter(i=>i.sel!==false).length && state.cart.length){
+    state.cart.forEach(i=>i.sel=true);
+  }
+  if(!state.cart.length){
+    toast('购物车是空的');
+    return;
+  }
+  if(state.stack[state.stack.length-1]?.screen!=='checkout'){
+    if(state.tab!=='home' && state.tab!=='category'){ /* keep tab */ }
+    nav('checkout');
+  }
+}
+
+function screenCheckout(){
+  const goods = selectedTotal();
+  const delivery = state.fulfill==='delivery' && goods<39 ? 5 : 0;
+  const couponOff = state.selectedCoupon ? (state.coupons.find(c=>c.id===state.selectedCoupon)?.amt||0) : 0;
+  const pointOff = state.usePoints ? Math.min(Math.floor(state.points/100), Math.floor(goods)) : 0;
+  const pay = Math.max(0, goods + delivery - couponOff - pointOff);
+  const addr = state.addresses.find(a=>a.id===state.selectedAddr);
+
+  return `
+  ${navBar('确认订单')}
+  <div class="content">
+    <div class="pad" style="padding-bottom:100px;">
+      <!-- address / pickup -->
+      ${state.fulfill==='pickup' ? `
+        <div class="card tappable" onclick="openStoreSheet()">
+          <div class="row">
+            <div class="icon-sq">店</div>
+            <div class="grow">
+              <div class="t fw6">${state.store}</div>
+              <div class="s">自提 · 下单后 2 小时内备货完成</div>
+            </div>
+            ${icons.chev}
+          </div>
+        </div>` : `
+        <div class="card tappable" onclick="nav('addresses')">
+          <div class="row">
+            <div class="icon-sq">址</div>
+            <div class="grow">
+              <div class="t fw6">${addr?addr.name+' '+addr.phone:'请选择收货地址'}</div>
+              <div class="s">${addr?addr.addr:'配送到家需填写地址'}</div>
+            </div>
+            ${icons.chev}
+          </div>
+        </div>`}
+
+      <div class="card">
+        ${state.cart.filter(i=>i.sel!==false).map(it=>`
+          <div class="row">
+            <div class="thumb sm">${it.name.split(' ')[0]}</div>
+            <div class="grow">
+              <div class="t" style="font-size:14px;">${it.name}</div>
+              <div class="s">×${it.qty}</div>
+            </div>
+            <div class="v">¥${(it.price*it.qty).toFixed(2)}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="section-title">优惠与积分</div>
+      <div class="grouped">
+        <div class="row tappable" onclick="openCouponSheet()">
+          <div class="grow"><div class="t">优惠券</div></div>
+          <div class="v">${state.selectedCoupon ? '-¥'+couponOff : (state.coupons.length? state.coupons.length+' 张可用':'无可用')}</div>
+          ${icons.chev}
+        </div>
+        <div class="row">
+          <div class="grow">
+            <div class="t">积分抵扣</div>
+            <div class="s">可用 ${state.points} 分 · 100 分 = ¥1</div>
+          </div>
+          <button class="check ${state.usePoints?'on':''}" onclick="toggleUsePoints()">${state.usePoints?'✓':''}</button>
+        </div>
+        <div class="row">
+          <div class="grow"><div class="t">备注</div></div>
+          <input class="input" style="height:36px;max-width:160px;text-align:right;background:transparent;" placeholder="选填" />
+        </div>
+      </div>
+
+      <div class="section-title">金额明细</div>
+      <div class="card pad-card">
+        <div class="flex between small mb8"><span class="muted">商品</span><span>¥${goods.toFixed(2)}</span></div>
+        <div class="flex between small mb8"><span class="muted">配送费</span><span>¥${delivery.toFixed(2)}</span></div>
+        <div class="flex between small mb8"><span class="muted">优惠券</span><span>-¥${couponOff.toFixed(2)}</span></div>
+        <div class="flex between small mb8"><span class="muted">积分抵扣</span><span>-¥${pointOff.toFixed(2)}</span></div>
+        <div class="flex between fw6" style="padding-top:8px;border-top:.5px solid var(--sep);font-size:15px;"><span>应付</span><span>¥${pay.toFixed(2)}</span></div>
+      </div>
+
+      <div class="notice">支付支持微信 / 支付板。下单成功后：自提生成<strong>提货码</strong>，配送进入<strong>履约状态机</strong>。</div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;background:rgba(249,249,249,.97);border-top:.5px solid var(--sep);padding:12px 16px;display:flex;align-items:center;gap:12px;">
+      <div style="flex:1;">
+        <div class="xs muted">应付</div>
+        <div class="price-lg" style="font-size:22px;">¥${pay.toFixed(2)}</div>
+      </div>
+      <button class="btn" style="width:140px;" onclick="payOrder(${pay})">提交订单</button>
+    </div>
+  </div>`;
+}
+function toggleUsePoints(){ state.usePoints=!state.usePoints; render(); }
+
+function openCouponSheet(){
+  openSheet('选择优惠券', `
+    <div class="grouped">
+      <div class="row tappable" onclick="pickCoupon(null)">
+        <div class="grow"><div class="t">不使用优惠券</div></div>
+        ${!state.selectedCoupon?'<span class="fw6">✓</span>':''}
+      </div>
+      ${state.coupons.map(c=>`
+        <div class="row tappable" onclick="pickCoupon('${c.id}')">
+          <div class="grow"><div class="t">${c.name}</div><div class="s">${c.cond} · 至 ${c.exp}</div></div>
+          <div class="v" style="color:#000;font-weight:600;">-¥${c.amt}</div>
+          ${state.selectedCoupon===c.id?'<span class="fw6">✓</span>':''}
+        </div>`).join('')}
+    </div>
+    <div class="notice mt16">券可来自：积分兑换、活动发放、商超促销。核销支持线上自动抵扣与线下收银扫码。</div>
+  `);
+}
+function pickCoupon(id){ state.selectedCoupon=id; closeSheet(); render(); }
+
+function payOrder(pay){
+  const goods = selectedTotal();
+  const items = state.cart.filter(i=>i.sel!==false).map(i=>`${i.name}×${i.qty}`).join('、');
+  const order = {
+    id:'SO'+Date.now().toString().slice(-11),
+    type:'商超',
+    status: state.fulfill==='pickup'?'待提货':'配送中',
+    statusKey: state.fulfill==='pickup'?'pickup':'shipping',
+    total: pay,
+    store: state.fulfill==='pickup'?state.store:'配送 · '+state.store,
+    time: '刚刚',
+    items
+  };
+  state.orders.unshift(order);
+  // consume coupon
+  if(state.selectedCoupon){
+    state.coupons = state.coupons.filter(c=>c.id!==state.selectedCoupon);
+    state.selectedCoupon=null;
+  }
+  if(state.usePoints){
+    const pointOff = Math.min(Math.floor(state.points/100), Math.floor(goods));
+    state.points -= pointOff*100;
+    state.usePoints=false;
+  }
+  // earn points from purchase (demo)
+  const earn = Math.floor(pay);
+  state.points += earn;
+  state.pointsToday += earn;
+  state.cart = state.cart.filter(i=>i.sel===false);
+  state.orderPayDemo = order;
+  replace('pay-success', {order, earn});
+  toast('支付成功，+'+earn+' 积分');
+}
+
+function screenPaySuccess(){
+  const {order, earn} = {order: state.orderPayDemo, earn: 12};
+  const code = String(order.id).slice(-6);
+  return `
+  ${navBar('支付结果', {back:false})}
+  <div class="content plain">
+    <div class="pad text-c">
+      <div class="success-mark">✓</div>
+      <div class="fw6" style="font-size:20px;">下单成功</div>
+      <div class="muted small mt8">${order.status==='待提货'?'请凭提货码到店取货':'骑手配送中，请保持电话畅通'}</div>
+
+      <div class="card pad-card text-c mt16" style="text-align:left;">
+        <div class="flex between mb8"><span class="muted small">订单号</span><span class="small fw6">${order.id}</span></div>
+        <div class="flex between mb8"><span class="muted small">门店</span><span class="small">${order.store}</span></div>
+        <div class="flex between mb8"><span class="muted small">实付</span><span class="small fw6">¥${order.total.toFixed(2)}</span></div>
+        <div class="flex between"><span class="muted small">积分</span><span class="small fw6">+${earn}</span></div>
+      </div>
+
+      ${order.status==='待提货'?`
+      <div class="card pad-card" style="text-align:left;">
+        <div class="xs muted mb8">提货码（示意）</div>
+        <div class="text-c" style="font-size:36px;font-weight:700;letter-spacing:4px;font-variant-numeric:tabular-nums;">${code}</div>
+        <div class="xs muted mt8 text-c">到店向店员出示，或扫门店核销机</div>
+      </div>`:''}
+
+      <div class="flex gap8 mt16">
+        <button class="btn secondary" style="flex:1;" onclick="resetTo('home')">回首页</button>
+        <button class="btn" style="flex:1;" onclick="state.stack=[];nav('orders')">查看订单</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function screenOrders(){
+  return `
+  ${navBar('我的订单')}
+  <div class="content">
+    <div class="pad">
+      <div class="seg mb12">
+        <button class="active">全部</button>
+        <button onclick="toast('筛选：商超')">商超</button>
+        <button onclick="toast('筛选：充电')">充电</button>
+        <button onclick="toast('筛选：加油')">加油</button>
+      </div>
+      ${state.orders.length===0?`<div class="empty"><div class="ei">单</div>暂无订单</div>`:state.orders.map(o=>`
+        <div class="order-card">
+          <div class="oh">
+            <span class="fw6">${o.type} · ${o.store}</span>
+            <span class="order-status">${o.status}</span>
+          </div>
+          <div class="ob" onclick="nav('order-detail',{id:'${o.id}'})" style="cursor:pointer;">
+            <div class="thumb sm">${o.type}</div>
+            <div class="grow" style="flex:1;">
+              <div class="small">${o.items}</div>
+              <div class="xs muted mt8">${o.time} · ${o.id}</div>
+            </div>
+            <div class="fw6">¥${o.total.toFixed(2)}</div>
+          </div>
+          <div class="of">
+            <button class="btn ghost sm" onclick="toast('联系客服（示意）')">客服</button>
+            <button class="btn sm" onclick="nav('order-detail',{id:'${o.id}'})">查看详情</button>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function screenOrderDetail(payload){
+  const o = state.orders.find(x=>x.id===payload?.id) || state.orders[0];
+  if(!o) return `${navBar('订单详情')}<div class="content"><div class="empty">订单不存在</div></div>`;
+  const steps = o.type==='充电'
+    ? ['已下单','充电中','已完成','已支付']
+    : ['已支付', o.statusKey==='pickup'?'备货中':'商家接单', o.statusKey==='pickup'?'待提货':'配送中','已完成'];
+  return `
+  ${navBar('订单详情')}
+  <div class="content">
+    <div class="pad">
+      <div class="card pad-card">
+        <div class="flex between items-c mb8">
+          <div class="fw6" style="font-size:17px;">${o.status}</div>
+          <span class="pill dark">${o.type}</span>
+        </div>
+        <div class="xs muted">${o.id} · ${o.time}</div>
+      </div>
+
+      <div class="section-title">进度</div>
+      <div class="card pad-card">
+        ${steps.map((s,i)=>`
+          <div class="flex gap12" style="margin-bottom:${i===steps.length-1?0:14}px;">
+            <div style="width:18px;display:flex;flex-direction:column;align-items:center;">
+              <div style="width:10px;height:10px;border-radius:50%;background:${i===0?'#000':'#C6C6C8'};"></div>
+              ${i<steps.length-1?`<div style="width:1.5px;flex:1;min-height:20px;background:#E5E5EA;"></div>`:''}
+            </div>
+            <div class="small ${i===0?'fw6':''}">${s}</div>
+          </div>`).join('')}
+      </div>
+
+      ${o.statusKey==='pickup'?`
+      <div class="card pad-card text-c">
+        <div class="xs muted mb8">提货码</div>
+        <div style="font-size:32px;font-weight:700;letter-spacing:4px;">${String(o.id).slice(-6)}</div>
+      </div>`:''}
+
+      <div class="section-title">商品/服务</div>
+      <div class="card pad-card">
+        <div class="small mb8">${o.items}</div>
+        <div class="flex between small"><span class="muted">实付</span><span class="fw6">¥${o.total.toFixed(2)}</span></div>
+      </div>
+
+      <div class="section-title">门店</div>
+      <div class="card pad-card small">${o.store}</div>
+
+      <div class="flex gap8 mt16">
+        <button class="btn secondary" style="flex:1;" onclick="toast('申请开票（预留）')">开发票</button>
+        <button class="btn secondary" style="flex:1;" onclick="toast('联系门店')">联系门店</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ========== Tasks / Points ========== */
+function screenTasks(){
+  return `
+  ${navBar('积分任务', {back:false, right:`<button onclick="nav('points-history')" style="font-size:15px;">明细</button>`})}
+  <div class="content">
+    <div class="pad">
+      <div class="asset-card">
+        <div class="flex between items-c">
+          <div>
+            <div class="an">我的积分</div>
+            <div class="av">${state.points}</div>
+            <div class="xs muted mt8">今日已得 ${state.pointsToday} 分 · 可兑券/抵扣/充电/加油</div>
+          </div>
+          <button class="btn sm" onclick="nav('points-history')">明细</button>
+        </div>
+      </div>
+
+      <div class="grid3" style="margin-bottom:14px;">
+        <button class="tile" onclick="nav('exchange')"><div class="ti">兑</div><div class="tl">兑换商城</div></button>
+        <button class="tile" onclick="nav('coupons')"><div class="ti">券</div><div class="tl">我的券包</div></button>
+        <button class="tile" onclick="nav('activities')"><div class="ti">活</div><div class="tl">线下活动</div></button>
+      </div>
+
+      <div class="section-title">做任务赚积分</div>
+      <div class="task-card">
+        <div class="ti">▶</div>
+        <div class="grow">
+          <div class="tt">观看激励视频</div>
+          <div class="ts">完整观看 +10 积分 · 剩余 ${Math.max(0,5-state.adsWatched)}/5 次</div>
+        </div>
+        <button class="btn sm" onclick="openRewardedAd()">去完成</button>
+      </div>
+      <div class="task-card">
+        <div class="ti">页</div>
+        <div class="grow">
+          <div class="tt">浏览品牌副广 15s</div>
+          <div class="ts">信息流/活动页曝光任务 · +5 积分</div>
+        </div>
+        <button class="btn sm secondary" onclick="openRewardedAd('browse')">去完成</button>
+      </div>
+      <div class="task-card">
+        <div class="ti">签</div>
+        <div class="grow">
+          <div class="tt">每日签到</div>
+          <div class="ts">连续签到可翻倍 · +5 积分</div>
+        </div>
+        <button class="btn sm secondary" onclick="checkin()">签到</button>
+      </div>
+      <div class="task-card">
+        <div class="ti">单</div>
+        <div class="grow">
+          <div class="tt">完成首单奖励</div>
+          <div class="ts">商超实付满 30 +50 积分（示意）</div>
+        </div>
+        <span class="pill">进行中</span>
+      </div>
+
+      <div class="section-title">积分能做什么</div>
+      <div class="card">
+        <div class="row tappable" onclick="nav('exchange')">
+          <div class="icon-sq">券</div>
+          <div class="grow"><div class="t">兑换优惠券 / 代金券</div><div class="s">商超下单自动抵扣</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="nav('equity')">
+          <div class="icon-sq">权</div>
+          <div class="grow"><div class="t">虚拟权益</div><div class="s">视频会员、话费、咖啡券…</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="nav('activities')">
+          <div class="icon-sq">活</div>
+          <div class="grow"><div class="t">线下活动报名</div><div class="s">积分抵报名费 · 到店核销</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="openEnergyTab('charge')">
+          <div class="icon-sq">充</div>
+          <div class="grow"><div class="t">抵扣充电费</div><div class="s">驿能光驰充电订单用分</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="openEnergyTab('fuel')">
+          <div class="icon-sq">油</div>
+          <div class="grow"><div class="t">兑换加油券</div><div class="s">到店出示核销</div></div>
+          ${icons.chev}
+        </div>
+      </div>
+
+      <div class="notice"><strong>广告变现：</strong>激励视频为主获取路径，副广展示为辅助；服务端防刷、日上限、幂等发分。</div>
+    </div>
+  </div>`;
+}
+
+let adTimer=null;
+function openRewardedAd(kind){
+  if(state.adsWatched>=5 && !kind){ toast('今日任务已完成'); return; }
+  const ov = document.getElementById('adOverlay');
+  const count = document.getElementById('adCount');
+  const reward = document.getElementById('adReward');
+  document.getElementById('adTitle').textContent = kind==='browse'?'品牌浏览任务':'激励视频广告';
+  document.getElementById('adDesc').textContent = kind==='browse'
+    ? '模拟信息流/活动页浏览任务，停留满 15 秒发分。'
+    : '观看完整视频可获得积分奖励。上线接入广告联盟 SDK。';
+  reward.style.display='none';
+  ov.classList.add('show');
+  let t = 3;
+  count.textContent = `剩余 ${t} 秒`;
+  clearInterval(adTimer);
+  adTimer = setInterval(()=>{
+    t--;
+    if(t<=0){
+      clearInterval(adTimer);
+      count.textContent='播放完成';
+      reward.style.display='flex';
+      reward.textContent = `领取 +${kind==='browse'?5:10} 积分`;
+      reward.dataset.kind = kind||'video';
+    } else {
+      count.textContent = `剩余 ${t} 秒`;
+    }
+  },1000);
+}
+function claimAdReward(){
+  const kind = document.getElementById('adReward').dataset.kind||'video';
+  const add = kind==='browse'?5:10;
+  state.points += add;
+  state.pointsToday += add;
+  state.adsWatched++;
+  document.getElementById('adOverlay').classList.remove('show');
+  render();
+  toast(`+${add} 积分`);
+}
+function checkin(){
+  state.points += 5;
+  state.pointsToday += 5;
+  render();
+  toast('签到成功 +5 积分');
+}
+
+function screenAdWall(){
+  return `
+  ${navBar('广告任务墙')}
+  <div class="content">
+    <div class="pad">
+      <div class="notice">副广展示位集合（首页 feed、任务页、结算页可复用）。此页用于向客户说明<strong>广告位资源包</strong>。</div>
+      ${['首页信息流 Banner','分类页插屏','任务页原生卡','结算页底部','订单完成插屏'].map((n,i)=>`
+        <div class="card pad-card" style="margin-bottom:10px;">
+          <div class="flex between items-c">
+            <div>
+              <div class="fw6">${n}</div>
+              <div class="xs muted mt8">位置 AD-0${i+1} · 曝光/点击监测</div>
+            </div>
+            <span class="pill">副广</span>
+          </div>
+        </div>`).join('')}
+      <button class="btn mt8" onclick="nav('tasks');openRewardedAd()">去做激励视频任务</button>
+    </div>
+  </div>`;
+}
+
+function screenPointsHistory(){
+  const rows = [
+    {t:'激励视频任务', d:'+10', time:'今天 10:12', up:true},
+    {t:'商超下单奖励', d:'+31', time:'今天 14:22', up:true},
+    {t:'兑换满减券', d:'-500', time:'昨天 19:00', up:false},
+    {t:'每日签到', d:'+5', time:'昨天 09:01', up:true},
+    {t:'充电抵扣', d:'-200', time:'09-21 18:10', up:false}
+  ];
+  return `
+  ${navBar('积分明细')}
+  <div class="content">
+    <div class="pad">
+      <div class="asset-card"><div class="an">当前余额</div><div class="av">${state.points}</div></div>
+      <div class="grouped">
+        ${rows.map(r=>`
+          <div class="row">
+            <div class="grow"><div class="t">${r.t}</div><div class="s">${r.time}</div></div>
+            <div class="fw6" style="color:${r.up?'#1C1C1E':'#8E8E93'};">${r.d}</div>
+          </div>`).join('')}
+      </div>
+      <div class="notice mt16">积分流水含获取、消耗、过期、风控回滚。对账与结算依赖后台（M9）。</div>
+    </div>
+  </div>`;
+}
+
+function screenExchange(){
+  return `
+  ${navBar('兑换商城')}
+  <div class="content">
+    <div class="pad">
+      <div class="asset-card">
+        <div class="flex between items-c">
+          <div><div class="an">可用积分</div><div class="av">${state.points}</div></div>
+          <button class="btn sm secondary" onclick="nav('points-history')">明细</button>
+        </div>
+      </div>
+      <div class="section-title">商超券</div>
+      ${[
+        {id:'x1', name:'满 50 减 10 券', cost:500},
+        {id:'x2', name:'无门槛 5 元券', cost:300},
+        {id:'x3', name:'满 100 减 20 券', cost:900}
+      ].map(c=>exchangeRow(c)).join('')}
+
+      <div class="section-title">加油券</div>
+      ${[
+        {id:'x4', name:'加油满 200 减 15', cost:800},
+        {id:'x5', name:'加油 10 元券', cost:600}
+      ].map(c=>exchangeRow(c, true)).join('')}
+
+      <div class="section-title">虚拟权益</div>
+      <div class="grid2">
+        ${equity.map(e=>`
+          <div class="card pad-card" style="margin:0;">
+            <div class="thumb" style="width:100%;height:64px;margin-bottom:8px;">${e.name}</div>
+            <div class="small fw6">${e.name}</div>
+            <div class="flex between items-c mt8">
+              <span class="xs">${e.cost} 分</span>
+              <button class="btn sm" onclick="redeem('${e.name}',${e.cost})">兑换</button>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <div class="section-title">线下活动</div>
+      <div class="card">
+        ${activities.map(a=>`
+          <div class="row tappable" onclick="nav('activity-detail',{id:'${a.id}'})">
+            <div class="grow"><div class="t">${a.name}</div><div class="s">${a.time}</div></div>
+            <span class="pill">${a.cost} 分</span>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function exchangeRow(c, isFuel){
+  return `
+  <div class="coupon">
+    <div class="cl">
+      <div class="amt">${c.name.match(/(\d+)/)?.[0]||'券'}<small>${c.name.includes('减')?'减':'元'}</small></div>
+      <div class="cond">${c.name.replace(/\d+元?/,'').slice(0,6)||'优惠'}</div>
+    </div>
+    <div class="cr">
+      <div class="ct">${c.name}</div>
+      <div class="cs">${c.cost} 积分${isFuel?' · 到店核销':' · 下单自动抵扣'}</div>
+      <div class="cd">有效期 30 天</div>
+    </div>
+    <div class="ca">
+      <button class="btn sm" onclick="redeem('${c.name}',${c.cost},${isFuel})">兑换</button>
+    </div>
+  </div>`;
+}
+function redeem(name, cost, isFuel){
+  if(state.points < cost){ toast('积分不足，先去做任务'); return; }
+  state.points -= cost;
+  if(isFuel){
+    state.fuelCoupons.push({id:'f'+Date.now(), name, exp:'30 天'});
+    toast('加油券已入账，去能源页核销');
+  } else {
+    const amt = parseInt(name.match(/(\d+)/)?.[0]||'10');
+    state.coupons.push({id:'c'+Date.now(), amt, cond: name.includes('满')?`满 ${name.match(/满\s*(\d+)/)?.[1]||50} 可用`:'无门槛', name, exp:'30 天', type:'shop'});
+    toast('兑换成功，已入券包');
+  }
+  render();
+}
+
+function screenCoupons(){
+  return `
+  ${navBar('我的券包')}
+  <div class="content">
+    <div class="pad">
+      <div class="seg mb12">
+        <button class="active">可使用</button>
+        <button onclick="toast('已用/过期')">已失效</button>
+      </div>
+      ${state.coupons.length===0?`<div class="empty"><div class="ei">券</div>暂无优惠券<div class="mt16"><button class="btn secondary" style="width:140px;margin:0 auto;" onclick="nav('exchange')">去兑换</button></div></div>`:
+      state.coupons.map(c=>`
+        <div class="coupon">
+          <div class="cl">
+            <div class="amt">${c.amt}<small>元</small></div>
+            <div class="cond">${c.cond}</div>
+          </div>
+          <div class="cr">
+            <div class="ct">${c.name}</div>
+            <div class="cs">商超下单可用</div>
+            <div class="cd">有效期至 ${c.exp}</div>
+          </div>
+          <div class="ca">
+            <button class="btn sm" onclick="goTab('category')">去使用</button>
+          </div>
+        </div>`).join('')}
+
+      <div class="section-title">加油券（${state.fuelCoupons.length}）</div>
+      ${state.fuelCoupons.length===0?`<div class="notice">在「积分兑换 / 能源 · 加油」用积分兑换后展示于此。</div>`:
+        state.fuelCoupons.map(c=>`
+          <div class="coupon">
+            <div class="cl"><div class="amt">油</div><div class="cond">加油站</div></div>
+            <div class="cr"><div class="ct">${c.name}</div><div class="cs">到店出示核销</div><div class="cd">${c.exp}内有效</div></div>
+            <div class="ca"><button class="btn sm" onclick="openEnergyTab('fuel')">去核销</button></div>
+          </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function screenEquity(){
+  return `
+  ${navBar('虚拟权益')}
+  <div class="content">
+    <div class="pad">
+      <div class="notice">第三方权益供应链：上架、库存、结算价在后台管理（M5.4/M5.6）。</div>
+      <div class="grid2">
+        ${equity.map(e=>`
+          <div class="card pad-card" style="margin:0;">
+            <div class="thumb" style="width:100%;height:72px;margin-bottom:8px;">${e.name}</div>
+            <div class="small fw6">${e.name}</div>
+            <div class="flex between items-c mt8">
+              <span class="xs">${e.cost} 积分</span>
+              <button class="btn sm" onclick="redeem('${e.name}',${e.cost})">兑换</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function screenActivities(){
+  return `
+  ${navBar('线下活动')}
+  <div class="content">
+    <div class="pad">
+      <div class="notice">积分可抵报名费；到店出示核销码，联动商超/充电站场景活动。</div>
+      ${activities.map(a=>`
+        <div class="card pad-card" style="margin-bottom:10px;" onclick="nav('activity-detail',{id:'${a.id}'})">
+          <div class="flex between items-c">
+            <div class="fw6" style="font-size:16px;">${a.name}</div>
+            <span class="pill">${a.cost} 积分</span>
+          </div>
+          <div class="xs muted mt8">${a.time} · ${a.place}</div>
+          <div class="flex between items-c mt8">
+            <span class="xs">余位 ${a.left}</span>
+            <span class="xs fw6">查看详情 ›</span>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function screenActivityDetail(payload){
+  const a = activities.find(x=>x.id===payload?.id)||activities[0];
+  const joined = state.activityJoined;
+  return `
+  ${navBar('活动详情')}
+  <div class="content">
+    <div class="pad">
+      <div class="thumb lg" style="width:100%;height:160px;border-radius:14px;margin-bottom:14px;">活动主图示意</div>
+      <div class="card pad-card">
+        <div class="fw6" style="font-size:18px;">${a.name}</div>
+        <div class="small muted mt8">${a.time}</div>
+        <div class="small muted mt8">${a.place}</div>
+        <div class="flex between items-c mt16">
+          <div><div class="xs muted">报名消耗</div><div class="fw6" style="font-size:18px;">${a.cost} 积分</div></div>
+          <span class="pill">余位 ${a.left}</span>
+        </div>
+      </div>
+      <div class="card pad-card small" style="line-height:1.6;">
+        活动说明：到场签到核销，可获赠积分或优惠券（后台配置）。适合品牌联动与门店引流。
+      </div>
+      ${joined?`
+        <div class="card pad-card text-c">
+          <div class="xs muted mb8">报名成功 · 核销码</div>
+          <div style="font-size:28px;font-weight:700;letter-spacing:3px;">A${String(a.id).slice(-4).toUpperCase()}</div>
+        </div>`:''}
+      <div class="notice">积分不足时可引导去任务中心看广告；报名记录在「我的 · 活动」。</div>
+    </div>
+    <div style="padding:12px 16px 28px;">
+      ${joined?`<button class="btn secondary" onclick="toast('已取消报名（示意）')">取消报名</button>`:
+      `<button class="btn" onclick="joinActivity(${a.cost})">用 ${a.cost} 积分报名</button>`}
+    </div>
+  </div>`;
+}
+function joinActivity(cost){
+  if(state.points<cost){ toast('积分不足'); return; }
+  state.points -= cost;
+  state.activityJoined = true;
+  render();
+  toast('报名成功');
+}
+
+/* ========== Energy ========== */
+function openEnergyTab(sub){
+  state.tab='energy';
+  state.stack=[];
+  if(sub==='fuel') state.stack.push({screen:'fuel'});
+  if(sub==='charge') { /* root */ }
+  render();
+}
+
+function screenEnergy(){
+  return `
+  ${navBar('能源中心', {back:false, right:`<button onclick="nav('energy-orders')" style="font-size:15px;">订单</button>`})}
+  <div class="content">
+    <div class="pad">
+      <div class="banner">
+        <div class="icon-sq" style="width:40px;height:40px;background:#000;color:#fff;border-radius:10px;font-size:12px;">驿能</div>
+        <div style="flex:1;">
+          <div class="bt">驿能光驰 · 已并入</div>
+          <div class="bs">充电找桩 / 充电中 / 账单 · 加油积分核销</div>
+        </div>
+      </div>
+
+      <div class="grid2 mb12">
+        <button class="card pad-card text-c" onclick="nav('charge-list')" style="margin:0;border:1.5px solid #000;">
+          <div class="ti" style="margin:0 auto;">充</div>
+          <div class="fw6 mt8">充电</div>
+          <div class="xs muted">找桩 · 扫码 · 积分抵扣</div>
+        </button>
+        <button class="card pad-card text-c" onclick="nav('fuel')" style="margin:0;">
+          <div class="ti" style="margin:0 auto;">油</div>
+          <div class="fw6 mt8">加油</div>
+          <div class="xs muted">积分兑券 · 到店核销</div>
+        </button>
+      </div>
+
+      ${state.charging?`
+      <div class="card pad-card" onclick="nav('charge-active')" style="border:1.5px solid #000;">
+        <div class="flex between items-c">
+          <div>
+            <div class="xs muted">充电进行中</div>
+            <div class="fw6" style="font-size:16px;margin-top:4px;">驿能·南山科技园站</div>
+          </div>
+          <span class="pill dark">${state.chargeKwh.toFixed(1)} 度</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, state.chargeKwh/40*100)}%"></div></div>
+        <div class="xs muted">点击查看实时功率与结算</div>
+      </div>`:''}
+
+      <div class="section-title">充电记录</div>
+      <div class="card">
+        <div class="row tappable" onclick="nav('charge-active')">
+          <div class="icon-sq">充</div>
+          <div class="grow"><div class="t">驿能·南山科技园站</div><div class="s">昨天 · 38.2 度 · ¥42.60</div></div>
+          <span class="pill">已完成</span>
+        </div>
+        <div class="row tappable" onclick="nav('charge-list')">
+          <div class="icon-sq">+</div>
+          <div class="grow"><div class="t">去找桩充电</div><div class="s">地图 / 列表 · 空闲枪筛选</div></div>
+          ${icons.chev}
+        </div>
+      </div>
+
+      <div class="section-title">加油</div>
+      <div class="card">
+        <div class="row tappable" onclick="nav('fuel')">
+          <div class="icon-sq">油</div>
+          <div class="grow"><div class="t">附近加油站</div><div class="s">积分兑换加油券 · 出示核销</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="nav('coupons')">
+          <div class="icon-sq">券</div>
+          <div class="grow"><div class="t">我的加油券（${state.fuelCoupons.length}）</div><div class="s">到店向油站出示</div></div>
+          ${icons.chev}
+        </div>
+      </div>
+
+      <div class="notice"><strong>并入策略待确认：</strong>API 深度对接 vs 小程序跳转/H5 嵌入；历史「驿能光驰」用户与订单是否迁移（报价关键项）。</div>
+    </div>
+  </div>`;
+}
+
+function screenChargeList(){
+  return `
+  ${navBar('找桩充电')}
+  <div class="content">
+    <div class="pad">
+      <div class="flex gap8 mb12">
+        <input class="input" placeholder="搜索站名 / 地址" />
+        <button class="btn sm secondary" style="height:44px;padding:0 14px;" onclick="toast('筛选：快充 / 空闲 / 品牌')">筛选</button>
+      </div>
+      <div class="map-ph">
+        <div class="me"></div>
+        <div class="pin" style="left:28%;top:30%;">1</div>
+        <div class="pin" style="left:58%;top:42%;">2</div>
+        <div class="pin" style="left:42%;top:62%;">3</div>
+        <div class="xs muted" style="position:absolute;left:10px;bottom:8px;">地图示意 · 高德/腾讯 SDK</div>
+      </div>
+      ${stations.map(s=>`
+        <div class="card pad-card" style="margin-bottom:10px;" onclick="nav('station',{id:'${s.id}'})">
+          <div class="flex between items-c">
+            <div class="fw6" style="font-size:15px;">${s.name}</div>
+            <span class="pill dark">${s.free.split('/')[0]} 空闲</span>
+          </div>
+          <div class="xs muted mt8">${s.addr} · ${s.dist}</div>
+          <div class="flex between items-c mt8">
+            <span class="small">电价 ¥${s.price}/度</span>
+            <span class="xs fw6">查看详情 ›</span>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function screenStation(payload){
+  const s = stations.find(x=>x.id===payload?.id)||stations[0];
+  return `
+  ${navBar('电站详情')}
+  <div class="content">
+    <div class="pad">
+      <div class="map-ph" style="height:140px;">
+        <div class="pin" style="left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:36px;">驿</div>
+      </div>
+      <div class="card pad-card">
+        <div class="fw6" style="font-size:17px;">${s.name}</div>
+        <div class="small muted mt8">${s.addr} · 距您 ${s.dist}</div>
+        <div class="flex gap8 mt12 wrap">
+          <span class="pill">快充</span>
+          <span class="pill">空闲 ${s.free}</span>
+          <span class="pill">¥${s.price}/度</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row"><div class="grow"><div class="t">营业时间</div></div><div class="v">24 小时</div></div>
+        <div class="row"><div class="grow"><div class="t">支付方式</div></div><div class="v">余额 / 微信 / 积分抵扣</div></div>
+        <div class="row"><div class="grow"><div class="t">积分抵扣</div></div><div class="v">100 分 = ¥1</div></div>
+      </div>
+      <div class="notice">启动充电：扫码或选枪 → 鉴权 → 充电中实时功率/电量/费用 → 结束账单。可勾选积分抵扣。</div>
+    </div>
+    <div style="padding:12px 16px 28px;display:flex;gap:10px;">
+      <button class="btn secondary" style="flex:1;" onclick="toast('打开地图导航')">导航</button>
+      <button class="btn" style="flex:1.4;" onclick="startCharge('${s.name}')">启动充电</button>
+    </div>
+  </div>`;
+}
+
+function startCharge(stationName){
+  state.charging = true;
+  state.chargeKwh = 0.4;
+  state.chargeCost = 0.5;
+  clearInterval(state.chargeTimer);
+  state.chargeTimer = setInterval(()=>{
+    state.chargeKwh += 0.3;
+    state.chargeCost = state.chargeKwh * 1.28;
+    const k = document.getElementById('ckwh');
+    const c = document.getElementById('ccost');
+    const bar = document.getElementById('cbar');
+    if(k) k.textContent = state.chargeKwh.toFixed(1);
+    if(c) c.textContent = state.chargeCost.toFixed(2);
+    if(bar) bar.style.width = Math.min(100, state.chargeKwh/40*100)+'%';
+  }, 800);
+  state.stack = state.stack.filter(s=>s.screen!=='charge-active');
+  nav('charge-active');
+  toast('充电已启动');
+}
+
+function screenChargeActive(){
+  if(!state.charging){
+    return `${navBar('充电')}<div class="content"><div class="empty"><div class="ei">充</div>当前没有进行中的充电<div class="mt16"><button class="btn secondary" style="width:140px;margin:0 auto;" onclick="back()">去找桩</button></div></div></div>`;
+  }
+  return `
+  ${navBar('充电中', {right:`<button onclick="endCharge()" style="font-size:15px;color:#FF3B30;">结束</button>`})}
+  <div class="content">
+    <div class="pad">
+      <div class="charge-hero">
+        <div class="xs muted mb8">驿能·南山科技园站 · 枪 A3</div>
+        <div><span class="big" id="ckwh">${state.chargeKwh.toFixed(1)}</span><span class="unit">kWh</span></div>
+        <div class="progress-track"><div class="progress-fill" id="cbar" style="width:${Math.min(100,state.chargeKwh/40*100)}%"></div></div>
+        <div class="meta">
+          <div><div class="mn">42 kW</div><div class="ml">当前功率</div></div>
+          <div><div class="mn">¥<span id="ccost">${state.chargeCost.toFixed(2)}</span></div><div class="ml">预计费用</div></div>
+          <div><div class="mn">40%</div><div class="ml">SOC</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row"><div class="grow"><div class="t">计费方式</div></div><div class="v">1.28 元/度</div></div>
+        <div class="row">
+          <div class="grow"><div class="t">积分抵扣</div><div class="s">余额 ${state.points} 分</div></div>
+          <button class="check ${state.usePoints?'on':''}" onclick="state.usePoints=!state.usePoints;render()">${state.usePoints?'✓':''}</button>
+        </div>
+        <div class="row"><div class="grow"><div class="t">支付方式</div></div><div class="v">微信支付</div></div>
+      </div>
+      <div class="notice">实时数据经驿能充电平台推送；结束后生成账单，可用积分抵扣，明细进「能源订单」。</div>
+      <button class="btn block-danger" onclick="endCharge()">结束充电并结算</button>
+    </div>
+  </div>`;
+}
+
+function endCharge(){
+  clearInterval(state.chargeTimer);
+  const cost = state.chargeCost || 12;
+  let pay = cost;
+  if(state.usePoints){
+    const off = Math.min(Math.floor(state.points/100), Math.floor(cost));
+    pay = Math.max(0, cost - off);
+    state.points -= off*100;
+  }
+  state.charging = false;
+  state.orders.unshift({
+    id:'CH'+Date.now().toString().slice(-10),
+    type:'充电', status:'已完成', statusKey:'done', total:pay,
+    store:'驿能·南山科技园站', time:'刚刚',
+    items:`充电 ${state.chargeKwh.toFixed(1)} 度`
+  });
+  state.chargeKwh=0; state.chargeCost=0;
+  state.usePoints=false;
+  state.stack=[]; state.tab='energy';
+  render();
+  toast(`充电完成，实付 ¥${pay.toFixed(2)}`);
+}
+
+function screenFuel(){
+  return `
+  ${navBar('加油积分')}
+  <div class="content">
+    <div class="pad">
+      <div class="notice">油车用户：<strong>积分兑换加油券 → 到店核销</strong>。加油站接口（油价/订单）按甲方提供的对接文档接入。</div>
+
+      <div class="section-title">我的加油券（${state.fuelCoupons.length}）</div>
+      ${state.fuelCoupons.length===0?`<div class="notice">暂无券，用积分在下方兑换。</div>`:
+        state.fuelCoupons.map((c,i)=>`
+          <div class="coupon">
+            <div class="cl"><div class="amt">油</div><div class="cond">核销码</div></div>
+            <div class="cr">
+              <div class="ct">${c.name}</div>
+              <div class="cs">出示给油站收银</div>
+              <div class="cd">NO. ${String(c.id).slice(-6)}</div>
+            </div>
+            <div class="ca"><button class="btn sm secondary" onclick="toast('核销码：'+String(c.id).slice(-6))">出示</button></div>
+          </div>`).join('')}
+
+      <div class="section-title">用积分兑换</div>
+      ${[
+        {id:'fx1', name:'加油满 200 减 15', cost:800},
+        {id:'fx2', name:'加油 10 元券', cost:600},
+        {id:'fx3', name:'加油满 300 减 30', cost:1500}
+      ].map(c=>exchangeRow(c, true)).join('')}
+
+      <div class="section-title">附近加油站</div>
+      ${gasStations.map(g=>`
+        <div class="card pad-card" style="margin-bottom:10px;">
+          <div class="flex between items-c">
+            <div class="fw6" style="font-size:15px;">${g.name}</div>
+            <span class="pill">${g.brand}</span>
+          </div>
+          <div class="xs muted mt8">${g.dist} · 92# ¥${g.oil}</div>
+          <div class="flex between items-c mt8">
+            <span class="xs muted">可用券 ${state.fuelCoupons.length} 张</span>
+            <button class="btn sm" onclick="toast('导航去油站（示意）')">导航</button>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function screenEnergyOrders(){
+  const list = state.orders.filter(o=>o.type!=='商超');
+  return `
+  ${navBar('能源订单')}
+  <div class="content">
+    <div class="pad">
+      ${list.length===0?`<div class="empty"><div class="ei">充</div>暂无充电/加油订单</div>`:
+      list.map(o=>`
+        <div class="order-card">
+          <div class="oh"><span>${o.type} · ${o.store}</span><span class="order-status">${o.status}</span></div>
+          <div class="ob">
+            <div class="thumb sm">${o.type}</div>
+            <div class="grow" style="flex:1;"><div class="small">${o.items}</div><div class="xs muted mt8">${o.time}</div></div>
+            <div class="fw6">¥${o.total.toFixed(2)}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ========== Profile ========== */
+function screenProfile(){
+  return `
+  ${navBar('我的', {back:false, right:`<button onclick="nav('settings')" style="font-size:15px;">设置</button>`})}
+  <div class="content">
+    <div class="pad">
+      <div class="card pad-card" style="margin-bottom:12px;">
+        <div class="flex gap12 items-c">
+          <div class="avatar">张</div>
+          <div class="grow" style="flex:1;">
+            <div class="fw6" style="font-size:18px;">张三</div>
+            <div class="xs muted mt8">138****8888 · ${state.store}</div>
+          </div>
+          <span class="pill">半直营会员</span>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <button class="stat" onclick="nav('points-history')"><div class="n">${state.points}</div><div class="l">积分</div></button>
+        <button class="stat" onclick="nav('coupons')"><div class="n">${state.coupons.length}</div><div class="l">优惠券</div></button>
+        <button class="stat" onclick="nav('coupons')"><div class="n">${state.fuelCoupons.length}</div><div class="l">加油券</div></button>
+      </div>
+
+      <div class="section-title">我的订单</div>
+      <div class="grouped">
+        <div class="row tappable" onclick="nav('orders')">
+          <div class="grow"><div class="t">全部订单</div></div>
+          <div class="v">${state.orders.length} 笔</div>${icons.chev}
+        </div>
+        <div class="row tappable" onclick="nav('orders')"><div class="grow"><div class="t">商超订单</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('energy-orders')"><div class="grow"><div class="t">充电订单</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('energy-orders')"><div class="grow"><div class="t">加油相关</div></div>${icons.chev}</div>
+      </div>
+
+      <div class="section-title">我的资产</div>
+      <div class="grouped">
+        <div class="row tappable" onclick="nav('points-history')"><div class="icon-sq">分</div><div class="grow"><div class="t">积分明细</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('coupons')"><div class="icon-sq">券</div><div class="grow"><div class="t">优惠券 / 加油券</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('equity')"><div class="icon-sq">权</div><div class="grow"><div class="t">虚拟权益</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('exchange')"><div class="icon-sq">兑</div><div class="grow"><div class="t">兑换商城</div></div>${icons.chev}</div>
+      </div>
+
+      <div class="section-title">服务</div>
+      <div class="grouped">
+        <div class="row tappable" onclick="nav('activities')"><div class="icon-sq">活</div><div class="grow"><div class="t">线下活动 / 我的报名</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('addresses')"><div class="icon-sq">址</div><div class="grow"><div class="t">收货地址</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="openStoreSheet()"><div class="icon-sq">店</div><div class="grow"><div class="t">切换门店</div></div><div class="v">${state.store}</div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('ad-wall')"><div class="icon-sq">广</div><div class="grow"><div class="t">广告与任务说明</div></div>${icons.chev}</div>
+        <div class="row tappable" onclick="nav('settings')"><div class="icon-sq">设</div><div class="grow"><div class="t">设置</div></div>${icons.chev}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function screenAddresses(){
+  return `
+  ${navBar('收货地址', {right:`<button onclick="toast('新增地址表单')">新增</button>`})}
+  <div class="content">
+    <div class="pad">
+      ${state.addresses.map(a=>`
+        <div class="card" style="margin-bottom:10px;">
+          <div class="row tappable" onclick="selectAddr('${a.id}')">
+            <div class="check ${state.selectedAddr===a.id?'on':''}">${state.selectedAddr===a.id?'✓':''}</div>
+            <div class="grow">
+              <div class="t fw6">${a.name} ${a.phone} ${a.def?'<span class="pill" style="height:18px;font-size:10px;margin-left:6px;">默认</span>':''}</div>
+              <div class="s">${a.addr}</div>
+            </div>
+          </div>
+          <div class="row" style="padding-top:0;border-top:none;">
+            <div class="grow"></div>
+            <button class="btn ghost sm" onclick="toast('编辑地址')">编辑</button>
+            <button class="btn ghost sm" onclick="toast('删除需确认')">删除</button>
+          </div>
+        </div>`).join('')}
+      <button class="btn secondary" onclick="toast('新增地址表单')">新增收货地址</button>
+      <div class="notice mt16">配送范围按门店计算；自提订单无需地址。</div>
+    </div>
+  </div>`;
+}
+function selectAddr(id){ state.selectedAddr=id; render(); toast('已选择地址'); }
+
+function screenSettings(){
+  return `
+  ${navBar('设置')}
+  <div class="content">
+    <div class="pad">
+      <div class="grouped">
+        <div class="row tappable"><div class="grow"><div class="t">账号与安全</div></div>${icons.chev}</div>
+        <div class="row tappable"><div class="grow"><div class="t">消息通知</div></div><div class="v">已开启</div>${icons.chev}</div>
+        <div class="row tappable"><div class="grow"><div class="t">隐私政策</div></div>${icons.chev}</div>
+        <div class="row tappable"><div class="grow"><div class="t">关于</div></div><div class="v">框架 v0.1</div>${icons.chev}</div>
+      </div>
+      <div class="mt16"><button class="btn block-danger" onclick="toast('退出登录（示意）')">退出登录</button></div>
+      <div class="notice mt16">正式版需补充：青少年模式、个性化广告开关、注销账号等合规项。</div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   Render
+========================================================= */
+function render(){
+  const host = document.getElementById('screenHost');
+  const top = state.stack[state.stack.length-1];
+  let html = '';
+  if(top){
+    const p = top.payload;
+    switch(top.screen){
+      case 'search': html = screenSearch(); break;
+      case 'product': html = screenProduct(); break;
+      case 'cart': html = screenCart(); break;
+      case 'checkout': html = screenCheckout(); break;
+      case 'pay-success': html = screenPaySuccess(); break;
+      case 'orders': html = screenOrders(); break;
+      case 'order-detail': html = screenOrderDetail(p); break;
+      case 'points-history': html = screenPointsHistory(); break;
+      case 'exchange': html = screenExchange(); break;
+      case 'coupons': html = screenCoupons(); break;
+      case 'equity': html = screenEquity(); break;
+      case 'activities': html = screenActivities(); break;
+      case 'activity-detail': html = screenActivityDetail(p); break;
+      case 'ad-wall': html = screenAdWall(); break;
+      case 'charge-list': html = screenChargeList(); break;
+      case 'station': html = screenStation(p); break;
+      case 'charge-active': html = screenChargeActive(); break;
+      case 'fuel': html = screenFuel(); break;
+      case 'energy-orders': html = screenEnergyOrders(); break;
+      case 'addresses': html = screenAddresses(); break;
+      case 'settings': html = screenSettings(); break;
+      default: html = screenHome();
+    }
+  } else {
+    switch(state.tab){
+      case 'home': html = screenHome(); break;
+      case 'category': html = screenCategory(); break;
+      case 'tasks': html = screenTasks(); break;
+      case 'energy': html = screenEnergy(); break;
+      case 'profile': html = screenProfile(); break;
+      default: html = screenHome();
+    }
+  }
+  host.innerHTML = html;
+
+  const tb = document.getElementById('tabbar');
+  tb.innerHTML = tabbarButtons();
+  const hideTabs = top && ['pay-success'].includes(top.screen);
+  tb.style.display = hideTabs ? 'none' : 'flex';
+}
+
+/* boot */
+render();
+</script>
+</body>
+</html>
