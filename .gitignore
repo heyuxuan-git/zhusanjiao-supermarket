@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+
+# Local tooling
+.playwright-cli/
+.mimocode/
+*.log
+nohup.out
+
+# Node (if later added)
+node_modules/
+
+# Env
+.env
+.env.*
