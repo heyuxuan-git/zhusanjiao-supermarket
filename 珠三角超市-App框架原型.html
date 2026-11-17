@@ -392,12 +392,95 @@
   .task-card .tt{font-size:16px;font-weight:600;}
   .task-card .ts{font-size:12px;color:var(--secondary);margin-top:3px;}
 
-  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
   .stat{
-    background:var(--white);border-radius:12px;padding:12px 8px;text-align:center;
+    background:var(--white);border-radius:14px;padding:14px 6px 12px;text-align:center;
+    border:.5px solid var(--sep);min-height:72px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
   }
-  .stat .n{font-size:20px;font-weight:700;letter-spacing:-.4px;}
-  .stat .l{font-size:11px;color:var(--secondary);margin-top:4px;}
+  .stat:active{background:var(--fill);}
+  .stat .n{font-size:18px;font-weight:700;letter-spacing:-.4px;line-height:1.15;}
+  .stat .l{font-size:11px;color:var(--secondary);margin-top:5px;}
+
+  /* 我的 · 身份卡 */
+  .profile-hero{
+    background:var(--white);border-radius:16px;padding:16px 14px;
+    border:.5px solid var(--sep);margin-bottom:12px;
+  }
+  .profile-hero .ph-top{display:flex;align-items:center;gap:12px;}
+  .profile-hero .avatar{
+    width:56px;height:56px;border-radius:50%;background:var(--fill-2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:700;color:var(--label2);flex:0 0 auto;
+  }
+  .profile-hero .ph-id{flex:1;min-width:0;}
+  .profile-hero .ph-name{
+    font-size:18px;font-weight:700;letter-spacing:-.2px;line-height:1.25;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .profile-hero .ph-phone{
+    font-size:12px;color:var(--secondary);margin-top:4px;
+    font-variant-numeric:tabular-nums;
+  }
+  .profile-hero .ph-member{
+    display:inline-flex;align-items:center;height:20px;padding:0 8px;
+    border-radius:10px;background:var(--grouped);color:var(--label2);
+    font-size:11px;font-weight:600;
+  }
+  .profile-hero .ph-store{
+    display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+    margin-top:12px;padding-top:12px;border-top:.5px solid var(--sep);
+    background:transparent;border-left:none;border-right:none;border-bottom:none;
+  }
+  .profile-hero .ph-store .tag{
+    flex-shrink:0;font-size:11px;font-weight:600;color:#fff;background:#1C1C1E;
+    height:22px;padding:0 8px;border-radius:11px;display:inline-flex;align-items:center;
+  }
+  .profile-hero .ph-store .txt{
+    flex:1;min-width:0;font-size:13px;color:var(--label);font-weight:500;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
+  /* 分组标题右侧操作 */
+  .section-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin:16px 4px 8px;
+  }
+  .section-head .st{
+    font-size:13px;font-weight:600;color:var(--secondary);letter-spacing:.4px;
+  }
+  .section-head .more{
+    font-size:13px;color:var(--label);font-weight:500;
+    display:inline-flex;align-items:center;gap:2px;
+  }
+
+  /* 订单四宫格 */
+  .order-quad{
+    background:var(--white);border-radius:14px;border:.5px solid var(--sep);
+    display:grid;grid-template-columns:repeat(4,1fr);padding:14px 4px 12px;
+    margin-bottom:4px;
+  }
+  .order-quad button{
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    background:transparent;position:relative;padding:4px 2px;
+  }
+  .order-quad .oi{
+    width:40px;height:40px;border-radius:12px;background:var(--grouped);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:var(--label2);position:relative;
+  }
+  .order-quad .ob{
+    font-size:11px;color:var(--label);font-weight:500;
+  }
+  .order-quad .cnt{
+    position:absolute;top:-6px;right:-8px;min-width:16px;height:16px;padding:0 4px;
+    background:#1C1C1E;color:#fff;font-size:10px;font-weight:700;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;border:2px solid #fff;
+  }
+  .order-quad .cnt.zero{display:none;}
+
+  /* 服务列表收紧 */
+  .svc-row .icon-sq{width:30px;height:30px;border-radius:8px;font-size:12px;}
 
   .empty{
     text-align:center;padding:48px 24px;color:var(--secondary);font-size:14px;
@@ -900,6 +983,7 @@ const state = {
   selectedAddr: 'a1',
   selectedCoupon: null,
   usePoints: false,
+  orderFilter: 'all',
   charging: false,
   chargeKwh: 0,
   chargeCost: 0,
@@ -1683,17 +1767,40 @@ function screenPaySuccess(){
 }
 
 function screenOrders(){
+  const f = state.orderFilter || 'all';
+  const tabs = [
+    ['all','全部'],
+    ['shop','商超'],
+    ['energy','能源'],
+    ['pay','待付款'],
+    ['pickup','待提货'],
+    ['shipping','配送中']
+  ];
+  let list = state.orders.slice();
+  if(f==='shop') list = list.filter(o=>o.type==='商超');
+  if(f==='energy') list = list.filter(o=>o.type!=='商超');
+  if(f==='pay') list = list.filter(o=>o.status==='待支付'||o.statusKey==='pay');
+  if(f==='pickup') list = list.filter(o=>o.status==='待提货'||o.statusKey==='pickup');
+  if(f==='shipping') list = list.filter(o=>o.status==='配送中'||o.statusKey==='shipping');
+  if(f==='preparing') list = list.filter(o=>o.status==='备货中'||o.status==='待接单');
+
   return `
   ${navBar('我的订单')}
   <div class="content">
     <div class="pad">
-      <div class="seg mb12">
-        <button class="active">全部</button>
-        <button onclick="toast('筛选：商超')">商超</button>
-        <button onclick="toast('筛选：充电')">充电</button>
-        <button onclick="toast('筛选：加油')">加油</button>
+      <div class="flex wrap gap8 mb12">
+        ${tabs.map(([k,l])=>`
+          <button class="pill ${f===k?'dark':''}" onclick="setOrderFilter('${k}')">${l}</button>
+        `).join('')}
       </div>
-      ${state.orders.length===0?`<div class="empty"><div class="ei">单</div>暂无订单</div>`:state.orders.map(o=>`
+      ${list.length===0?`
+        <div class="empty">
+          <div class="ei">单</div>
+          暂无「${tabs.find(t=>t[0]===f)?.[1]||'相关'}」订单
+          <div class="mt16">
+            <button class="btn secondary" style="width:140px;margin:0 auto;" onclick="setOrderFilter('all')">查看全部</button>
+          </div>
+        </div>`:list.map(o=>`
         <div class="order-card">
           <div class="oh">
             <span class="fw6">${o.type} · ${o.store}</span>
@@ -1712,6 +1819,7 @@ function screenOrders(){
             <button class="btn sm" onclick="nav('order-detail',{id:'${o.id}'})">查看详情</button>
           </div>
         </div>`).join('')}
+      <div class="notice mt8">充电/加油订单与商超订单已分桶；从「我的」四宫格可直接进对应状态。</div>
     </div>
   </div>`;
 }
@@ -2483,56 +2591,136 @@ function screenEnergyOrders(){
 
 /* ========== Profile ========== */
 function screenProfile(){
+  const eqCount = 0; /* 权益库存示意：兑换后可累加 */
+  const orderCounts = countOrdersByBucket();
   return `
-  ${navBar('我的', {back:false, right:`<button onclick="nav('settings')" style="font-size:15px;">设置</button>`})}
+  ${navBar('我的', {
+    back:false,
+    right:`<button onclick="nav('settings')" style="font-size:15px;" aria-label="设置">设置</button>`
+  })}
   <div class="content">
-    <div class="pad">
-      <div class="card pad-card" style="margin-bottom:12px;">
-        <div class="flex gap12 items-c">
+    <div class="pad" style="padding-bottom:28px;">
+
+      <!-- 身份 + 常用门店 -->
+      <div class="profile-hero">
+        <div class="ph-top">
           <div class="avatar">张</div>
-          <div class="grow" style="flex:1;">
-            <div class="fw6" style="font-size:18px;">张三</div>
-            <div class="xs muted mt8">138****8888 · ${state.store}</div>
+          <div class="ph-id">
+            <div class="ph-name">
+              张三
+              <span class="ph-member">普通会员</span>
+            </div>
+            <div class="ph-phone">138****8888</div>
           </div>
-          <span class="pill">半直营会员</span>
+          <button class="btn ghost sm" style="flex-shrink:0;" onclick="toast('资料编辑（示意）')">编辑</button>
+        </div>
+        <button class="ph-store" onclick="openStoreSheet()" aria-label="切换门店">
+          <span class="tag">门店</span>
+          <span class="txt">${state.store} · ${state.fulfill==='pickup'?'当前自提':'当前配送'}</span>
+          ${icons.chev}
+        </button>
+      </div>
+
+      <!-- 资产总览：与订单/服务分层，避免再叠一层「我的资产」长列表 -->
+      <div class="stat-row" role="list">
+        <button class="stat" role="listitem" onclick="nav('points-history')">
+          <div class="n">${state.points}</div><div class="l">积分</div>
+        </button>
+        <button class="stat" role="listitem" onclick="nav('coupons')">
+          <div class="n">${state.coupons.length}</div><div class="l">优惠券</div>
+        </button>
+        <button class="stat" role="listitem" onclick="nav('coupons')">
+          <div class="n">${state.fuelCoupons.length}</div><div class="l">加油券</div>
+        </button>
+        <button class="stat" role="listitem" onclick="nav('equity')">
+          <div class="n">${eqCount}</div><div class="l">权益</div>
+        </button>
+      </div>
+
+      <!-- 订单：状态快捷 + 全部入口（替代 4 条重复长列表） -->
+      <div class="section-head">
+        <span class="st">我的订单</span>
+        <button class="more" onclick="setOrderFilter('all')">全部订单 ${icons.chev}</button>
+      </div>
+      <div class="order-quad">
+        <button onclick="setOrderFilter('pay')">
+          <div class="oi">付<span class="cnt ${orderCounts.pay?'':'zero'}">${orderCounts.pay}</span></div>
+          <span class="ob">待付款</span>
+        </button>
+        <button onclick="setOrderFilter('preparing')">
+          <div class="oi">备<span class="cnt ${orderCounts.preparing?'':'zero'}">${orderCounts.preparing}</span></div>
+          <span class="ob">备货中</span>
+        </button>
+        <button onclick="setOrderFilter('pickup')">
+          <div class="oi">提<span class="cnt ${orderCounts.pickup?'':'zero'}">${orderCounts.pickup}</span></div>
+          <span class="ob">待提货</span>
+        </button>
+        <button onclick="setOrderFilter('shipping')">
+          <div class="oi">配<span class="cnt ${orderCounts.shipping?'':'zero'}">${orderCounts.shipping}</span></div>
+          <span class="ob">配送中</span>
+        </button>
+      </div>
+
+      <!-- 常用服务：只保留高频；设置仅在导航栏 -->
+      <div class="section-head">
+        <span class="st">常用服务</span>
+      </div>
+      <div class="grouped">
+        <div class="row tappable svc-row" onclick="nav('activities')">
+          <div class="icon-sq">活</div>
+          <div class="grow"><div class="t">线下活动</div><div class="s">报名记录与核销码</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable svc-row" onclick="nav('addresses')">
+          <div class="icon-sq">址</div>
+          <div class="grow"><div class="t">收货地址</div><div class="s">配送到家时使用</div></div>
+          <div class="v">${state.addresses.length} 个</div>${icons.chev}
+        </div>
+        <div class="row tappable svc-row" onclick="nav('exchange')">
+          <div class="icon-sq">兑</div>
+          <div class="grow"><div class="t">兑换商城</div><div class="s">积分换券 · 权益 · 活动</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable svc-row" onclick="toast('在线客服（示意）')">
+          <div class="icon-sq">服</div>
+          <div class="grow"><div class="t">联系客服</div><div class="s">订单 / 售后 / 充电问题</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable svc-row" onclick="nav('ad-wall')">
+          <div class="icon-sq">广</div>
+          <div class="grow"><div class="t">广告与积分说明</div><div class="s">任务规则 · 隐私开关入口</div></div>
+          ${icons.chev}
         </div>
       </div>
 
-      <div class="stat-row">
-        <button class="stat" onclick="nav('points-history')"><div class="n">${state.points}</div><div class="l">积分</div></button>
-        <button class="stat" onclick="nav('coupons')"><div class="n">${state.coupons.length}</div><div class="l">优惠券</div></button>
-        <button class="stat" onclick="nav('coupons')"><div class="n">${state.fuelCoupons.length}</div><div class="l">加油券</div></button>
-      </div>
-
-      <div class="section-title">我的订单</div>
-      <div class="grouped">
-        <div class="row tappable" onclick="nav('orders')">
-          <div class="grow"><div class="t">全部订单</div></div>
-          <div class="v">${state.orders.length} 笔</div>${icons.chev}
-        </div>
-        <div class="row tappable" onclick="nav('orders')"><div class="grow"><div class="t">商超订单</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('energy-orders')"><div class="grow"><div class="t">充电订单</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('energy-orders')"><div class="grow"><div class="t">加油相关</div></div>${icons.chev}</div>
-      </div>
-
-      <div class="section-title">我的资产</div>
-      <div class="grouped">
-        <div class="row tappable" onclick="nav('points-history')"><div class="icon-sq">分</div><div class="grow"><div class="t">积分明细</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('coupons')"><div class="icon-sq">券</div><div class="grow"><div class="t">优惠券 / 加油券</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('equity')"><div class="icon-sq">权</div><div class="grow"><div class="t">虚拟权益</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('exchange')"><div class="icon-sq">兑</div><div class="grow"><div class="t">兑换商城</div></div>${icons.chev}</div>
-      </div>
-
-      <div class="section-title">服务</div>
-      <div class="grouped">
-        <div class="row tappable" onclick="nav('activities')"><div class="icon-sq">活</div><div class="grow"><div class="t">线下活动 / 我的报名</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('addresses')"><div class="icon-sq">址</div><div class="grow"><div class="t">收货地址</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="openStoreSheet()"><div class="icon-sq">店</div><div class="grow"><div class="t">切换门店</div></div><div class="v">${state.store}</div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('ad-wall')"><div class="icon-sq">广</div><div class="grow"><div class="t">广告与任务说明</div></div>${icons.chev}</div>
-        <div class="row tappable" onclick="nav('settings')"><div class="icon-sq">设</div><div class="grow"><div class="t">设置</div></div>${icons.chev}</div>
+      <div class="notice mt16" style="margin-bottom:0;">
+        设置、账号安全在右上角。积分可抵商超下单、充电与加油券；自提/配送价以购物页所选为准。
       </div>
     </div>
   </div>`;
+}
+
+/* 订单状态分桶：供四宫格角标与列表筛选 */
+function countOrdersByBucket(){
+  const c = {pay:0, preparing:0, pickup:0, shipping:0, done:0};
+  state.orders.forEach(o=>{
+    const k = o.statusKey || '';
+    if(k==='pay'||o.status==='待支付') c.pay++;
+    else if(k==='pickup'||o.status==='待提货') c.pickup++;
+    else if(k==='shipping'||o.status==='配送中') c.shipping++;
+    else if(o.status==='备货中'||o.status==='待接单') c.preparing++;
+    else c.done++;
+  });
+  return c;
+}
+
+function setOrderFilter(f){
+  state.orderFilter = f;
+  if(state.stack[state.stack.length-1]?.screen==='orders'){
+    render();
+  } else {
+    nav('orders');
+  }
 }
 
 function screenAddresses(){
