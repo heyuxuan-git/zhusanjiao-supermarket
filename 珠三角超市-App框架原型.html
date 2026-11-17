@@ -267,6 +267,38 @@
   .banner .bt{font-size:15px;font-weight:600;}
   .banner .bs{font-size:12px;color:var(--secondary);margin-top:3px;}
 
+  .home-hero-banner{
+    position:relative;border-radius:16px;overflow:hidden;margin-bottom:12px;
+    background:linear-gradient(135deg,#1C1C1E 0%,#3A3A3C 55%,#5C5C66 100%);
+    color:#fff;min-height:132px;display:block;width:100%;text-align:left;
+  }
+  .home-hero-banner .hb-pad{padding:18px 16px 16px;display:flex;flex-direction:column;height:100%;min-height:132px;}
+  .home-hero-banner .hb-tag{
+    display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:11px;
+    background:rgba(255,255,255,.18);font-size:11px;font-weight:600;letter-spacing:.4px;width:fit-content;
+  }
+  .home-hero-banner .hb-title{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-top:10px;line-height:1.3;}
+  .home-hero-banner .hb-sub{font-size:12px;opacity:.78;margin-top:6px;line-height:1.45;}
+  .home-hero-banner .hb-cta{
+    margin-top:auto;padding-top:12px;display:flex;align-items:center;justify-content:space-between;
+  }
+  .home-hero-banner .hb-cta span{font-size:12px;opacity:.7;}
+  .home-hero-banner .hb-btn{
+    height:30px;padding:0 14px;border-radius:15px;background:#fff;color:#1C1C1E;
+    font-size:13px;font-weight:600;display:inline-flex;align-items:center;
+  }
+  .home-hero-banner .hb-dots{position:absolute;right:14px;top:16px;display:flex;gap:5px;}
+  .home-hero-banner .hb-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);}
+  .home-hero-banner .hb-dots i.on{background:#fff;width:14px;border-radius:3px;}
+
+  .home-search{
+    display:flex;align-items:center;gap:8px;width:100%;
+    height:44px;border-radius:12px;background:var(--fill);
+    padding:0 14px;margin-bottom:12px;color:var(--secondary);
+    font-size:15px;text-align:left;
+  }
+  .home-search:active{opacity:.85;}
+
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
@@ -382,17 +414,37 @@
   }
   .progress-fill{height:100%;background:var(--black);border-radius:3px;width:0;transition:width .6s ease;}
 
+  /* 底部购物栏：参考积分商城悬浮结算条 */
   .cart-bar{
-    position:absolute;left:12px;right:12px;bottom:16px;
-    background:var(--white);border-radius:16px;padding:10px 12px;
-    display:flex;align-items:center;gap:12px;
-    box-shadow:0 8px 24px rgba(0,0,0,.14);border:.5px solid var(--sep);
+    position:absolute;left:10px;right:10px;bottom:14px;
+    background:var(--white);border-radius:18px;
+    padding:8px 8px 8px 14px;
+    display:flex;align-items:center;gap:10px;
+    box-shadow:0 10px 28px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.06);
     z-index:25;
+    min-height:56px;
   }
-  .cart-bar .info{flex:1;}
-  .cart-bar .total{font-size:13px;color:var(--secondary);}
-  .cart-bar .num{font-size:20px;font-weight:700;letter-spacing:-.4px;}
-  .cart-bar .btn{width:auto;padding:0 18px;height:40px;font-size:15px;}
+  .cart-bar .cb-icon{
+    width:40px;height:40px;border-radius:12px;background:var(--grouped);
+    display:flex;align-items:center;justify-content:center;position:relative;flex:0 0 auto;
+    color:var(--label);
+  }
+  .cart-bar .cb-icon .badge{
+    position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;
+    background:var(--black);color:#fff;font-size:10px;font-weight:700;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;border:2px solid var(--white);
+  }
+  .cart-bar .info{flex:1;min-width:0;}
+  .cart-bar .total{font-size:11px;color:var(--secondary);line-height:1.2;}
+  .cart-bar .num{font-size:20px;font-weight:700;letter-spacing:-.4px;line-height:1.15;color:var(--label);}
+  .cart-bar .num small{font-size:12px;font-weight:600;margin-right:1px;}
+  .cart-bar .btn{
+    width:auto;min-width:96px;padding:0 18px;height:40px;font-size:15px;
+    border-radius:12px;flex:0 0 auto;
+  }
+  .cart-bar .btn:disabled,.cart-bar .btn.is-empty{
+    background:var(--fill);color:var(--tertiary);
+  }
 
   .stepper{
     display:flex;align-items:center;gap:0;background:var(--fill);border-radius:8px;overflow:hidden;
@@ -533,19 +585,33 @@
   .asset-card .an{font-size:13px;color:var(--secondary);}
   .asset-card .av{font-size:36px;font-weight:700;letter-spacing:-1px;margin-top:4px;}
 
-  .cat-layout{display:flex;height:100%;min-height:0;}
+  /* 购物页：与其它页同宽（占满内容区） */
+  .content.cat-page{
+    padding:0;overflow:hidden;background:var(--grouped);
+    display:flex;flex-direction:column;
+  }
+  .cat-toolbar{
+    flex:0 0 auto;padding:10px 16px 8px;background:var(--grouped);
+    border-bottom:.5px solid transparent;
+  }
+  .cat-layout{
+    flex:1;min-height:0;display:flex;width:100%;min-width:100%;
+  }
   .cat-side{
-    width:96px;flex:0 0 auto;background:var(--grouped);overflow-y:auto;
+    width:88px;flex:0 0 88px;background:var(--grouped);overflow-y:auto;
     border-right:.5px solid var(--sep);
   }
   .cat-side button{
-    width:100%;padding:14px 8px;font-size:13px;color:var(--secondary);
+    width:100%;padding:16px 6px;font-size:13px;color:var(--secondary);
     text-align:center;border-left:3px solid transparent;
   }
   .cat-side button.active{
     background:var(--white);color:var(--label);font-weight:600;border-left-color:var(--black);
   }
-  .cat-main{flex:1;overflow-y:auto;background:var(--white);padding:8px 10px 24px;}
+  .cat-main{
+    flex:1;min-width:0;overflow-y:auto;background:var(--white);
+    padding:12px 14px 88px;
+  }
 
   .list-item{
     display:flex;gap:12px;padding:12px 0;border-bottom:.5px solid var(--sep);align-items:center;
@@ -811,7 +877,7 @@ function navBar(title, opts={}){
 function tabbarButtons(){
   const tabs = [
     ['home','首页',icons.home],
-    ['category','分类',icons.grid],
+    ['category','购物',icons.grid],
     ['tasks','积分任务',icons.gift],
     ['energy','能源',icons.bolt],
     ['profile','我的',icons.user]
@@ -827,13 +893,31 @@ function tabbarButtons(){
    Screens
 ========================================================= */
 function screenHome(){
-  const greet = state.fulfill==='pickup' ? `自提 · ${state.store}` : '配送到家';
   return `
-  ${navBar('珠三角超市', {back:false, right:`<button onclick="nav('search')" aria-label="搜索">${icons.search}</button>`})}
-  <div class="content" id="content">
-    <div class="pad">
-      <!-- store + fulfill -->
-      <div class="card pad-card" style="margin-bottom:10px;">
+  <div class="content" id="content" style="padding-top:8px;">
+    <div class="pad" style="padding-top:4px;">
+      <!-- 搜索独占一行 -->
+      <button class="home-search" onclick="nav('search')">
+        ${icons.search}
+        <span>搜索商品、品牌</span>
+      </button>
+
+      <!-- 顶部 Banner：活动 / 最新商品 -->
+      <button class="home-hero-banner" onclick="nav('activities')">
+        <div class="hb-pad">
+          <span class="hb-tag">本周活动</span>
+          <div class="hb-title">周末亲子烘焙课<br/>积分抵报名费</div>
+          <div class="hb-sub">本周六 14:00 · 南山旗舰店 2F · 余位 8</div>
+          <div class="hb-cta">
+            <span>也可切换查看最新到货</span>
+            <span class="hb-btn">立即参与</span>
+          </div>
+        </div>
+        <div class="hb-dots"><i class="on"></i><i></i><i></i></div>
+      </button>
+
+      <!-- 门店 + 履约 -->
+      <div class="card pad-card" style="margin-bottom:12px;">
         <div class="flex between items-c" style="margin-bottom:12px;">
           <button class="flex items-c gap8" onclick="openStoreSheet()" style="text-align:left;">
             <span class="pill dark" style="font-size:11px;">门店</span>
@@ -849,60 +933,31 @@ function screenHome(){
         <div class="xs muted mt8">${state.fulfill==='pickup' ? '下单后凭提货码到店取货 · 今日营业 08:00–22:00' : '满 39 免运费 · 预计 45 分钟送达'}</div>
       </div>
 
-      <!-- search -->
-      <button class="row tappable" style="border-radius:12px;min-height:44px;padding:10px 14px;margin-bottom:12px;" onclick="nav('search')">
-        <span class="muted" style="display:flex;align-items:center;gap:8px;font-size:15px;">${icons.search} 搜索商品、品牌</span>
-      </button>
-
-      <!-- quick ads banner -->
-      <div class="banner" onclick="nav('ad-wall')">
-        <div class="icon-sq" style="width:40px;height:40px;border-radius:10px;">广</div>
-        <div class="grow" style="flex:1;">
-          <div class="bt">看广告得积分</div>
-          <div class="bs">今日还可领 ${Math.max(0,5-state.adsWatched)} 次 · 副广位同步展示</div>
-        </div>
-        ${icons.chev}
-      </div>
-
-      <!--金刚区 -->
-      <div class="grid5" style="margin-bottom:12px;">
+      <!-- 金刚区：仅 8 个核心入口；订单/地址/券等在「我的」 -->
+      <div class="grid4" style="margin-bottom:14px;gap:10px;">
         ${[
-          ['分类',"goTab('category')",'分'],
+          ['购物',"goTab('category')",'购'],
           ['积分任务',"goTab('tasks')",'积'],
           ['充电',"openEnergyTab('charge')",'充'],
-          ['加油券',"openEnergyTab('fuel')",'油'],
-          ['优惠券',"nav('coupons')",'券'],
-          ['线下活动',"nav('activities')",'活'],
-          ['兑换商城',"nav('exchange')",'兑'],
-          ['订单',"nav('orders')",'单'],
-          ['地址',"nav('addresses')",'址'],
-          ['更多',"goTab('profile')",'更']
+          ['加油',"openEnergyTab('fuel')",'油'],
+          ['兑换',"nav('exchange')",'兑'],
+          ['活动',"nav('activities')",'活'],
+          ['赚积分',"nav('ad-wall')",'广'],
+          ['我的',"goTab('profile')",'我']
         ].map(([l,fn,ic])=>`
-          <button class="tile" onclick="${fn}" style="padding:10px 4px;">
-            <div class="ti" style="width:36px;height:36px;border-radius:10px;font-size:13px;">${ic}</div>
+          <button class="tile" onclick="${fn}" style="padding:12px 6px;">
+            <div class="ti" style="width:40px;height:40px;border-radius:12px;font-size:14px;">${ic}</div>
             <div class="tl">${l}</div>
           </button>`).join('')}
       </div>
 
-      <!-- fulfillment CTA -->
-      <div class="grid2" style="margin-bottom:14px;">
-        <button class="card pad-card text-c" onclick="setFulfill('pickup')" style="border:${state.fulfill==='pickup'?'1.5px solid #000':'0.5px solid #C6C6C8'};margin:0;">
-          <div class="fw6" style="font-size:15px;">到店自提</div>
-          <div class="xs muted mt8">最近门店 0.8km</div>
-        </button>
-        <button class="card pad-card text-c" onclick="setFulfill('delivery')" style="border:${state.fulfill==='delivery'?'1.5px solid #000':'0.5px solid #C6C6C8'};margin:0;">
-          <div class="fw6" style="font-size:15px;">配送到家</div>
-          <div class="xs muted mt8">满 39 免运费</div>
-        </button>
-      </div>
-
       <div class="section-title">今日推荐</div>
-      <div class="prod-grid">
+      <div class="prod-grid" style="margin-bottom:14px;">
         ${[...products['蔬菜'], ...products['乳品']].slice(0,4).map(p=>prodCard(p)).join('')}
       </div>
 
       <div class="section-title">运营位（副广 Feed）</div>
-      <div class="card">
+      <div class="card" style="margin-bottom:12px;">
         <div class="row tappable" onclick="nav('ad-wall')">
           <div class="icon-sq">AD</div>
           <div class="grow"><div class="t">品牌副广 · 信息流 1</div><div class="s">首页 feed 广告位 · 按曝光结算</div></div>
@@ -925,9 +980,8 @@ function screenHome(){
           </div>`).join('')}
       </div>
 
-      <div class="notice mt8"><strong>框架说明：</strong>价格/库存以所选门店为准，正式版对接客户 ERP。支付、广告 SDK、充电与加油接口为第三方对接项。</div>
+      <div class="notice mt8"><strong>框架说明：</strong>首页不展示购物车浮层；购物车入口在「购物」页与商品详情。价格/库存以所选门店为准。</div>
     </div>
-    ${cartBar()}
   </div>`;
 }
 
@@ -946,17 +1000,18 @@ function prodCard(p){
 
 function cartBar(){
   const n = cartCount();
-  if(!n) return '';
+  const total = cartTotal();
+  const empty = n === 0;
   return `<div class="cart-bar">
-    <div style="width:40px;height:40px;border-radius:50%;background:var(--fill);display:flex;align-items:center;justify-content:center;position:relative;">
+    <div class="cb-icon" onclick="${empty?"goTab('category')":"nav('cart')"}" role="button" aria-label="购物车">
       ${icons.cart}
-      <span class="badge" style="top:-4px;right:-6px;background:#000;color:#fff;position:absolute;min-width:16px;height:16px;border-radius:8px;font-size:10px;display:flex;align-items:center;justify-content:center;">${n}</span>
+      ${empty ? '' : `<span class="badge">${n}</span>`}
     </div>
-    <div class="info">
-      <div class="total">合计</div>
-      <div class="num">¥${cartTotal().toFixed(2)}</div>
+    <div class="info" onclick="${empty?"goTab('category')":"nav('cart')"}">
+      <div class="total">${empty ? '购物车是空的' : `已选 ${n} 件`}</div>
+      <div class="num">${empty ? '<span style="font-size:14px;font-weight:600;color:var(--secondary);">去逛逛</span>' : `<small>¥</small>${total.toFixed(2)}`}</div>
     </div>
-    <button class="btn" onclick="nav('cart')">去结算</button>
+    <button class="btn ${empty?'is-empty':''}" onclick="${empty?"goTab('category')":"nav('cart')"}">${empty?'去选购':'去结算'}</button>
   </div>`;
 }
 
@@ -1005,19 +1060,22 @@ function addToCart(id, name){
 function screenCategory(){
   const list = products[state.cat] || [];
   return `
-  ${navBar('分类', {back:false, right:`<button onclick="nav('cart')">${icons.cart}</button>`})}
-  <div class="content plain" style="padding:0;">
+  ${navBar('购物', {back:false, right:`<button onclick="nav('cart')" aria-label="购物车">${icons.cart}</button>`})}
+  <div class="content cat-page">
+    <div class="cat-toolbar">
+      <button class="home-search" style="margin-bottom:0;" onclick="nav('search')">
+        ${icons.search}
+        <span>在购物中搜索商品</span>
+      </button>
+    </div>
     <div class="cat-layout">
       <div class="cat-side">
         ${catList.map(c=>`<button class="${state.cat===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
       </div>
       <div class="cat-main">
-        <div class="flex between items-c" style="margin:4px 4px 10px;">
+        <div class="flex between items-c" style="margin:2px 2px 10px;">
           <span class="fw6" style="font-size:16px;">${state.cat}</span>
-          <span class="xs muted">${state.store.slice(0,6)}… 有货</span>
-        </div>
-        <div style="margin-bottom:12px;">
-          <input class="input" placeholder="在${state.cat}中搜索" onfocus="nav('search')" readonly style="height:38px;font-size:14px;" />
+          <span class="xs muted">${state.store} · 有货</span>
         </div>
         ${list.map(p=>`
           <div class="list-item" onclick="openProduct('${p.id}')">
