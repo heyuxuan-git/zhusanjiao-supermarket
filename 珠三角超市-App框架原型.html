@@ -974,6 +974,7 @@ const state = {
   fuelCoupons: [],
   orders: [
     {id:'SO20250923001', type:'商超', status:'待提货', statusKey:'pickup', total:31.8, store:'深圳南山旗舰店', time:'今天 14:20', items:'有机菜心×1、鲜牛奶×2'},
+    {id:'SO20250922016', type:'商超', status:'配送中', statusKey:'shipping', total:56.5, store:'配送 · 深圳南山旗舰店', time:'昨天 16:40', items:'鲜鸡蛋×1、五常大米×1、苹果×4', addr:'深圳市南山区粤海街道科技园南路 18 号'},
     {id:'CH20250922088', type:'充电', status:'已完成', statusKey:'done', total:42.6, store:'驿能·南山科技园站', time:'昨天 18:05', items:'充电 38.2 度'}
   ],
   addresses: [
@@ -1193,7 +1194,7 @@ function screenHome(){
           ['加油',"openEnergyTab('fuel')",'油'],
           ['兑换',"nav('exchange')",'兑'],
           ['活动',"nav('activities')",'活'],
-          ['赚积分',"nav('ad-wall')",'广'],
+          ['净水',"nav('water')",'净'],
           ['我的',"goTab('profile')",'我']
         ].map(([l,fn,ic])=>`
           <button class="tile" onclick="${fn}" style="padding:12px 6px;">
@@ -1705,12 +1706,13 @@ function payOrder(pay){
   const order = {
     id:'SO'+Date.now().toString().slice(-11),
     type:'商超',
-    status: state.fulfill==='pickup'?'待提货':'配送中',
-    statusKey: state.fulfill==='pickup'?'pickup':'shipping',
+    status: state.fulfill==='pickup'?'待提货':'待发货',
+    statusKey: state.fulfill==='pickup'?'pickup':'shipping_wait',
     total: pay,
     store: state.fulfill==='pickup'?state.store:'配送 · '+state.store,
     time: '刚刚',
-    items
+    items,
+    addr: state.fulfill==='delivery' ? (state.addresses.find(a=>a.id===state.selectedAddr)?.addr||'') : ''
   };
   state.orders.unshift(order);
   // consume coupon
@@ -1742,21 +1744,25 @@ function screenPaySuccess(){
     <div class="pad text-c">
       <div class="success-mark">✓</div>
       <div class="fw6" style="font-size:20px;">下单成功</div>
-      <div class="muted small mt8">${order.status==='待提货'?'请凭提货码到店取货':'骑手配送中，请保持电话畅通'}</div>
+      <div class="muted small mt8">${order.statusKey==='pickup'?'请凭提货码到店取货':(order.statusKey==='shipping_wait'?'商家备货中，发货后进入配送':'配送进行中，请保持电话畅通')}</div>
 
       <div class="card pad-card text-c mt16" style="text-align:left;">
         <div class="flex between mb8"><span class="muted small">订单号</span><span class="small fw6">${order.id}</span></div>
         <div class="flex between mb8"><span class="muted small">门店</span><span class="small">${order.store}</span></div>
+        ${order.addr?`<div class="flex between mb8"><span class="muted small">地址</span><span class="small" style="max-width:60%;text-align:right;">${order.addr}</span></div>`:''}
         <div class="flex between mb8"><span class="muted small">实付</span><span class="small fw6">¥${order.total.toFixed(2)}</span></div>
         <div class="flex between"><span class="muted small">积分</span><span class="small fw6">+${earn}</span></div>
       </div>
 
-      ${order.status==='待提货'?`
+      ${order.statusKey==='pickup'?`
       <div class="card pad-card" style="text-align:left;">
         <div class="xs muted mb8">提货码（示意）</div>
         <div class="text-c" style="font-size:36px;font-weight:700;letter-spacing:4px;font-variant-numeric:tabular-nums;">${code}</div>
         <div class="xs muted mt8 text-c">到店向店员出示，或扫门店核销机</div>
       </div>`:''}
+
+      ${order.statusKey==='shipping_wait'?`
+      <div class="notice mt16" style="text-align:left;">配送订单状态（对齐联动互联）：<strong>待发货 → 发送货 → 配送中 → 确认送达</strong>。店员在后台发货后，这里会变成配送中。</div>`:''}
 
       <div class="flex gap8 mt16">
         <button class="btn secondary" style="flex:1;" onclick="resetTo('home')">回首页</button>
@@ -1781,8 +1787,8 @@ function screenOrders(){
   if(f==='energy') list = list.filter(o=>o.type!=='商超');
   if(f==='pay') list = list.filter(o=>o.status==='待支付'||o.statusKey==='pay');
   if(f==='pickup') list = list.filter(o=>o.status==='待提货'||o.statusKey==='pickup');
-  if(f==='shipping') list = list.filter(o=>o.status==='配送中'||o.statusKey==='shipping');
-  if(f==='preparing') list = list.filter(o=>o.status==='备货中'||o.status==='待接单');
+  if(f==='shipping') list = list.filter(o=>['shipping','shipping_wait','shipping_done'].includes(o.statusKey)||o.status==='配送中'||o.status==='待发货'||o.status==='已送达');
+  if(f==='preparing') list = list.filter(o=>o.status==='备货中'||o.status==='待接单'||o.statusKey==='shipping_wait');
 
   return `
   ${navBar('我的订单')}
@@ -1827,9 +1833,12 @@ function screenOrders(){
 function screenOrderDetail(payload){
   const o = state.orders.find(x=>x.id===payload?.id) || state.orders[0];
   if(!o) return `${navBar('订单详情')}<div class="content"><div class="empty">订单不存在</div></div>`;
+  const isDelivery = o.type==='商超' && ['shipping','shipping_wait','shipping_done'].includes(o.statusKey);
   const steps = o.type==='充电'
     ? ['已下单','充电中','已完成','已支付']
-    : ['已支付', o.statusKey==='pickup'?'备货中':'商家接单', o.statusKey==='pickup'?'待提货':'配送中','已完成'];
+    : (isDelivery
+        ? ['已支付', '备货中', '发货/配送中', '确认送达']
+        : ['已支付', '备货中', '待提货', '已完成']);
   return `
   ${navBar('订单详情')}
   <div class="content">
@@ -1840,6 +1849,7 @@ function screenOrderDetail(payload){
           <span class="pill dark">${o.type}</span>
         </div>
         <div class="xs muted">${o.id} · ${o.time}</div>
+        ${o.addr?`<div class="xs muted mt8">收货：${o.addr}</div>`:''}
       </div>
 
       <div class="section-title">进度</div>
@@ -1860,6 +1870,34 @@ function screenOrderDetail(payload){
         <div style="font-size:32px;font-weight:700;letter-spacing:4px;">${String(o.id).slice(-6)}</div>
       </div>`:''}
 
+      ${isDelivery && o.statusKey==='shipping_wait'?`
+      <div class="card pad-card">
+        <div class="flex between items-c">
+          <div>
+            <div class="xs muted">配送状态</div>
+            <div class="fw6 mt8">待发货 · 店员发送货</div>
+          </div>
+          <button class="btn sm secondary" onclick="advanceDelivery('${o.id}')">模拟发货</button>
+        </div>
+        <div class="xs muted mt8">示意：对应联动后台「发送货」</div>
+      </div>`:''}
+      ${isDelivery && o.statusKey==='shipping'?`
+      <div class="card pad-card">
+        <div class="flex between items-c">
+          <div>
+            <div class="xs muted">配送状态</div>
+            <div class="fw6 mt8">配送中 · 待确认送达</div>
+          </div>
+          <button class="btn sm" onclick="advanceDelivery('${o.id}')">确认送达</button>
+        </div>
+        <div class="xs muted mt8">示意：对齐联动「确认送达」</div>
+      </div>`:''}
+      ${isDelivery && o.statusKey==='shipping_done'?`
+      <div class="card pad-card text-c">
+        <div class="fw6">已送达</div>
+        <div class="xs muted mt8">配送完成 · 可评价/开发票</div>
+      </div>`:''}
+
       <div class="section-title">商品/服务</div>
       <div class="card pad-card">
         <div class="small mb8">${o.items}</div>
@@ -1875,6 +1913,23 @@ function screenOrderDetail(payload){
       </div>
     </div>
   </div>`;
+}
+
+function advanceDelivery(id){
+  const o = state.orders.find(x=>x.id===id);
+  if(!o) return;
+  if(o.statusKey==='shipping_wait'){
+    o.statusKey='shipping';
+    o.status='配送中';
+    toast('已发货 · 配送中');
+  } else if(o.statusKey==='shipping'){
+    o.statusKey='shipping_done';
+    o.status='已送达';
+    toast('已确认送达');
+  } else {
+    toast('当前状态无需推进');
+  }
+  render();
 }
 
 /* ========== Tasks / Points ========== */
@@ -1898,6 +1953,11 @@ function screenTasks(){
         <button class="tile" onclick="nav('exchange')"><div class="ti">兑</div><div class="tl">兑换商城</div></button>
         <button class="tile" onclick="nav('coupons')"><div class="ti">券</div><div class="tl">我的券包</div></button>
         <button class="tile" onclick="nav('activities')"><div class="ti">活</div><div class="tl">线下活动</div></button>
+      </div>
+      <div class="grid3" style="margin-bottom:14px;">
+        <button class="tile" onclick="nav('convenience')"><div class="ti">便</div><div class="tl">便民服务</div></button>
+        <button class="tile" onclick="nav('water')"><div class="ti">净</div><div class="tl">智能净水</div></button>
+        <button class="tile" onclick="nav('ad-wall')"><div class="ti">广</div><div class="tl">赚积分</div></button>
       </div>
 
       <div class="section-title">做任务赚积分</div>
@@ -2666,6 +2726,16 @@ function screenProfile(){
         <span class="st">常用服务</span>
       </div>
       <div class="grouped">
+        <div class="row tappable svc-row" onclick="nav('water')">
+          <div class="icon-sq">净</div>
+          <div class="grow"><div class="t">智能净水</div><div class="s">设备 · 滤芯 · 换芯服务</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable svc-row" onclick="nav('convenience')">
+          <div class="icon-sq">便</div>
+          <div class="grow"><div class="t">便民服务</div><div class="s">话费 · 缴费 · 会员等</div></div>
+          ${icons.chev}
+        </div>
         <div class="row tappable svc-row" onclick="nav('activities')">
           <div class="icon-sq">活</div>
           <div class="grow"><div class="t">线下活动</div><div class="s">报名记录与核销码</div></div>
@@ -2707,7 +2777,7 @@ function countOrdersByBucket(){
     const k = o.statusKey || '';
     if(k==='pay'||o.status==='待支付') c.pay++;
     else if(k==='pickup'||o.status==='待提货') c.pickup++;
-    else if(k==='shipping'||o.status==='配送中') c.shipping++;
+    else if(k==='shipping'||k==='shipping_wait'||k==='shipping_done'||o.status==='配送中'||o.status==='待发货'||o.status==='已送达') c.shipping++;
     else if(o.status==='备货中'||o.status==='待接单') c.preparing++;
     else c.done++;
   });
@@ -2749,6 +2819,142 @@ function screenAddresses(){
   </div>`;
 }
 function selectAddr(id){ state.selectedAddr=id; render(); toast('已选择地址'); }
+
+/* ========== Phase2: 智能净水 · 线框占位 ========== */
+function screenWater(){
+  return `
+  ${navBar('智能净水', {right:`<button onclick="nav('water-bind')" style="font-size:15px;">绑定</button>`})}
+  <div class="content">
+    <div class="pad">
+      <div class="notice"><strong>二期模块（线框）：</strong>自有净水硬件。设备状态与滤芯数据为示意，上线接 IoT 平台。</div>
+
+      <div class="card pad-card" style="margin-bottom:12px;">
+        <div class="flex between items-c">
+          <div>
+            <div class="xs muted">我的设备 · 1 台</div>
+            <div class="fw6 mt8" style="font-size:16px;">家用净水器 · 型号 W200</div>
+            <div class="xs muted mt8">SN 示意 · 已绑定 · 在线</div>
+          </div>
+          <span class="pill dark">在线</span>
+        </div>
+        <div class="mt16">
+          <div class="flex between xs mb8"><span class="muted">PP 棉滤芯</span><span class="fw6">剩余 42%</span></div>
+          <div class="progress-track" style="margin:0 0 12px;"><div class="progress-fill" style="width:42%;"></div></div>
+          <div class="flex between xs mb8"><span class="muted">RO 反渗透滤芯</span><span class="fw6">剩余 78%</span></div>
+          <div class="progress-track" style="margin:0;"><div class="progress-fill" style="width:78%;"></div></div>
+        </div>
+        <div class="flex gap8 mt16">
+          <button class="btn secondary sm" style="flex:1;" onclick="toast('TDS 示意：进水 186 · 出水 28')">水质 TDS</button>
+          <button class="btn sm" style="flex:1;" onclick="toast('已加入滤芯清单（示意）')">购买滤芯</button>
+        </div>
+      </div>
+
+      <div class="section-title">服务</div>
+      <div class="grouped">
+        <div class="row tappable" onclick="toast('滤芯商城（走商超/仓配履约）')">
+          <div class="icon-sq">芯</div>
+          <div class="grow"><div class="t">滤芯商城</div><div class="s">到期提醒 · 一键下单</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="toast('上门换芯预约（示意）')">
+          <div class="icon-sq">约</div>
+          <div class="grow"><div class="t">上门换芯 / 检修</div><div class="s">预约工单 · 可用积分抵扣</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="toast('质护记录（示意）')">
+          <div class="icon-sq">护</div>
+          <div class="grow"><div class="t">质护与保修</div><div class="s">换芯记录 · 故障报修</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="nav('water-bind')">
+          <div class="icon-sq">绑</div>
+          <div class="grow"><div class="t">绑定新设备</div><div class="s">扫码 / 输入 SN</div></div>
+          ${icons.chev}
+        </div>
+      </div>
+
+      <div class="section-title">滤芯耗材</div>
+      <div class="tc-goods">
+        <div class="thumb">PP 棉<br/>示意</div>
+        <div class="info">
+          <div class="title">PP 棉滤芯 · 通用款</div>
+          <div class="meta"><span>适配 W200</span><span>库存有</span></div>
+          <div class="prices"><span class="cash">¥59</span><span style="font-size:11px;color:var(--secondary);">可用积分抵扣</span></div>
+        </div>
+        <button class="add-btn" onclick="toast('加入购物车（示意）')">+</button>
+      </div>
+      <div class="tc-goods">
+        <div class="thumb">RO 膜<br/>示意</div>
+        <div class="info">
+          <div class="title">RO 反渗透滤芯</div>
+          <div class="meta"><span>适配 W200</span><span>库存有</span></div>
+          <div class="prices"><span class="cash">¥299</span><span style="font-size:11px;color:var(--secondary);">可用积分抵扣</span></div>
+        </div>
+        <button class="add-btn" onclick="toast('加入购物车（示意）')">+</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function screenWaterBind(){
+  return `
+  ${navBar('绑定设备')}
+  <div class="content">
+    <div class="pad">
+      <div class="notice">扫码机身二维码，或手动输入 SN。上线对接净水 IoT 设备云。</div>
+      <div class="card pad-card text-c" style="padding:36px 16px;">
+        <div style="width:120px;height:120px;border:2px dashed var(--fill-2);border-radius:16px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--secondary);">扫码区示意</div>
+        <div class="xs muted mt16">对准净水器铭牌 / 机身二维码</div>
+      </div>
+      <div class="section-title">或手动输入</div>
+      <div class="grouped">
+        <div class="row"><div class="grow"><div class="t">设备 SN</div></div><input class="input" style="max-width:160px;height:36px;text-align:right;" placeholder="如 W200-0001" /></div>
+        <div class="row"><div class="grow"><div class="t">安装地址</div></div><input class="input" style="max-width:160px;height:36px;text-align:right;" placeholder="选填" /></div>
+      </div>
+      <div class="mt16"><button class="btn" onclick="back();toast('绑定成功（示意）')">确认绑定</button></div>
+    </div>
+  </div>`;
+}
+
+/* ========== Phase2: 便民服务 · 规划中列表 ========== */
+function screenConvenience(){
+  const items = [
+    {n:'话费充值', s:'移动/联通/电信', p:'P0 候选', on:true},
+    {n:'水电燃气缴费', s:'生活缴费通道', p:'P0 候选', on:true},
+    {n:'视频/音乐会员', s:'与虚拟权益供应链复用', p:'P0 候选', on:true},
+    {n:'公交卡充值', s:'城市出行周边', p:'规划中', on:false},
+    {n:'跑腿代办', s:'与到家运力复用', p:'规划中', on:false},
+    {n:'家政保洁', s:'到家服务', p:'规划中', on:false},
+    {n:'维修开锁', s:'到家服务', p:'规划中', on:false},
+    {n:'体检挂号', s:'合作方接入', p:'远期', on:false}
+  ];
+  return `
+  ${navBar('便民服务')}
+  <div class="content">
+    <div class="pad">
+      <div class="notice"><strong>二期结构占位：</strong>候选清单供甲方勾选进开发；灰态项暂不进首版。</div>
+      <div class="section-title">优先候选</div>
+      <div class="grouped">
+        ${items.filter(i=>i.on).map(i=>`
+          <div class="row tappable" onclick="toast('${i.n} · 接入方案确认后开发')">
+            <div class="icon-sq">${i.n.slice(0,1)}</div>
+            <div class="grow"><div class="t">${i.n}</div><div class="s">${i.s}</div></div>
+            <span class="pill">${i.p}</span>
+          </div>`).join('')}
+      </div>
+      <div class="section-title">规划中</div>
+      <div class="grouped" style="opacity:.55;">
+        ${items.filter(i=>!i.on).map(i=>`
+          <div class="row">
+            <div class="icon-sq">${i.n.slice(0,1)}</div>
+            <div class="grow"><div class="t">${i.n}</div><div class="s">${i.s}</div></div>
+            <span class="pill">${i.p}</span>
+          </div>`).join('')}
+      </div>
+      <div class="notice mt16">入口：首页金刚区暂以净水为主；本页与「积分任务 · 我的 · 常用服务」可达。</div>
+    </div>
+  </div>`;
+}
 
 function screenSettings(){
   return `
@@ -2798,6 +3004,9 @@ function render(){
       case 'energy-orders': html = screenEnergyOrders(); break;
       case 'addresses': html = screenAddresses(); break;
       case 'settings': html = screenSettings(); break;
+      case 'water': html = screenWater(); break;
+      case 'water-bind': html = screenWaterBind(); break;
+      case 'convenience': html = screenConvenience(); break;
       default: html = screenHome();
     }
   } else {
