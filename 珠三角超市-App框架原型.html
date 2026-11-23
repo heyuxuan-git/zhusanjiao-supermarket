@@ -1232,7 +1232,7 @@ function screenHome(){
           </div>`).join('')}
       </div>
 
-      <div class="notice mt8"><strong>动线说明：</strong>首页只展示最近门店，点击进入「购物」；在购物页切换门店，并选择到店自提 / 配送到家（两者价格可能不同）。购物车不在此页浮层首页。</div>
+      <div class="notice mt8"><strong>动线说明：</strong>首页最近门店 →「购物」选门店与自提/配送 → 结算（配送需地址）→ 订单可点「发货 / 确认送达」。生活 Tab 聚合充电、加油、净水、便民。</div>
     </div>
   </div>`;
 }
@@ -1400,10 +1400,18 @@ function screenCategory(){
           <button class="${isPickup?'active':''}" onclick="setFulfill('pickup')">到店自提</button>
           <button class="${!isPickup?'active':''}" onclick="setFulfill('delivery')">配送到家</button>
         </div>
+        ${!isPickup?`
+        <button class="row tappable" style="border-radius:10px;margin-top:8px;padding:10px 12px;background:var(--grouped);border:none;width:100%;" onclick="nav('addresses')">
+          <span class="pill" style="font-size:11px;flex-shrink:0;">地址</span>
+          <span class="grow" style="flex:1;text-align:left;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            ${state.addresses.find(a=>a.id===state.selectedAddr)?.addr || '请选择收货地址'}
+          </span>
+          ${icons.chev}
+        </button>`:''}
         <div class="price-note">
           ${isPickup
             ? '当前：到店自提 · 凭提货码取货。切换门店后价格/库存会变。'
-            : '当前：配送到家 · 满 39 免运费。自提与配送售价可能不同，以结算页为准。'}
+            : '当前：配送到家 · 满 39 免运费 · 发货后状态：待发货→配送中→确认送达。自提与配送售价可能不同。'}
         </div>
       </div>
     </div>
@@ -1604,28 +1612,31 @@ function screenCheckout(){
   ${navBar('确认订单')}
   <div class="content">
     <div class="pad" style="padding-bottom:100px;">
-      <!-- address / pickup -->
-      ${state.fulfill==='pickup' ? `
-        <div class="card tappable" onclick="openStoreSheet()">
-          <div class="row">
+      <!-- 履约模式可在此改；配送必须有地址 -->
+      <div class="card pad-card" style="margin-bottom:10px;">
+        <div class="seg mb12">
+          <button class="${state.fulfill==='pickup'?'active':''}" onclick="setFulfill('pickup')">到店自提</button>
+          <button class="${state.fulfill!=='pickup'?'active':''}" onclick="setFulfill('delivery')">配送到家</button>
+        </div>
+        ${state.fulfill==='pickup' ? `
+          <div class="flex gap12 items-c tappable" onclick="openStoreSheet()">
             <div class="icon-sq">店</div>
             <div class="grow">
               <div class="t fw6">${state.store}</div>
               <div class="s">自提 · 下单后 2 小时内备货完成</div>
             </div>
             ${icons.chev}
-          </div>
-        </div>` : `
-        <div class="card tappable" onclick="nav('addresses')">
-          <div class="row">
+          </div>` : `
+          <div class="flex gap12 items-c tappable" onclick="nav('addresses')">
             <div class="icon-sq">址</div>
             <div class="grow">
               <div class="t fw6">${addr?addr.name+' '+addr.phone:'请选择收货地址'}</div>
-              <div class="s">${addr?addr.addr:'配送到家需填写地址'}</div>
+              <div class="s">${addr?addr.addr:'配送到家必填地址'}</div>
             </div>
             ${icons.chev}
           </div>
-        </div>`}
+          <div class="xs muted mt12">配送链路：支付 → 待发货 → 发送货 → 配送中 → 确认送达</div>`}
+      </div>
 
       <div class="card">
         ${state.cart.filter(i=>i.sel!==false).map(it=>`
@@ -1668,16 +1679,25 @@ function screenCheckout(){
         <div class="flex between fw6" style="padding-top:8px;border-top:.5px solid var(--sep);font-size:15px;"><span>应付</span><span>¥${pay.toFixed(2)}</span></div>
       </div>
 
-      <div class="notice">支付支持微信 / 支付板。下单成功后：自提生成<strong>提货码</strong>，配送进入<strong>履约状态机</strong>。</div>
+      <div class="notice">支付支持微信 / 支付宝。下单成功后：自提生成<strong>提货码</strong>；配送进入 <strong>待发货 → 配送中 → 确认送达</strong>。</div>
     </div>
     <div style="position:absolute;left:0;right:0;bottom:0;background:rgba(249,249,249,.97);border-top:.5px solid var(--sep);padding:12px 16px;display:flex;align-items:center;gap:12px;">
       <div style="flex:1;">
         <div class="xs muted">应付</div>
         <div class="price-lg" style="font-size:22px;">¥${pay.toFixed(2)}</div>
       </div>
-      <button class="btn" style="width:140px;" onclick="payOrder(${pay})">提交订单</button>
+      <button class="btn" style="width:140px;" onclick="submitCheckout(${pay})">${state.fulfill!=='pickup'&&!addr?'先选地址':'提交订单'}</button>
     </div>
   </div>`;
+}
+
+function submitCheckout(pay){
+  if(state.fulfill!=='pickup' && !state.addresses.find(a=>a.id===state.selectedAddr)){
+    toast('请先选择收货地址');
+    nav('addresses');
+    return;
+  }
+  payOrder(pay);
 }
 function toggleUsePoints(){ state.usePoints=!state.usePoints; render(); }
 
