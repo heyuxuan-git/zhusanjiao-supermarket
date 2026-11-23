@@ -1137,7 +1137,7 @@ function tabbarButtons(){
     ['home','首页',icons.home],
     ['category','购物',icons.grid],
     ['tasks','积分任务',icons.gift],
-    ['energy','能源',icons.bolt],
+    ['energy','生活',icons.bolt],
     ['profile','我的',icons.user]
   ];
   return tabs.map(([k,l,ic])=>`
@@ -1777,7 +1777,7 @@ function screenOrders(){
   const tabs = [
     ['all','全部'],
     ['shop','商超'],
-    ['energy','能源'],
+    ['energy','生活'],
     ['pay','待付款'],
     ['pickup','待提货'],
     ['shipping','配送中']
@@ -2234,7 +2234,7 @@ function redeem(name, cost, isFuel){
   state.points -= cost;
   if(isFuel){
     state.fuelCoupons.push({id:'f'+Date.now(), name, exp:'30 天'});
-    toast('加油券已入账，去能源页核销');
+    toast('加油券已入账，去「生活 · 加油」核销');
   } else {
     const amt = parseInt(name.match(/(\d+)/)?.[0]||'10');
     state.coupons.push({id:'c'+Date.now(), amt, cond: name.includes('满')?`满 ${name.match(/满\s*(\d+)/)?.[1]||50} 可用`:'无门槛', name, exp:'30 天', type:'shop'});
@@ -2270,7 +2270,7 @@ function screenCoupons(){
         </div>`).join('')}
 
       <div class="section-title">加油券（${state.fuelCoupons.length}）</div>
-      ${state.fuelCoupons.length===0?`<div class="notice">在「积分兑换 / 能源 · 加油」用积分兑换后展示于此。</div>`:
+      ${state.fuelCoupons.length===0?`<div class="notice">在「积分兑换 / 生活 · 加油」用积分兑换后展示于此。</div>`:
         state.fuelCoupons.map(c=>`
           <div class="coupon">
             <div class="cl"><div class="amt">油</div><div class="cond">加油站</div></div>
@@ -2376,27 +2376,33 @@ function openEnergyTab(sub){
 
 function screenEnergy(){
   return `
-  ${navBar('能源中心', {back:false, right:`<button onclick="nav('energy-orders')" style="font-size:15px;">订单</button>`})}
+  ${navBar('生活', {back:false, right:`<button onclick="nav('energy-orders')" style="font-size:15px;">订单</button>`})}
   <div class="content">
     <div class="pad">
       <div class="banner">
-        <div class="icon-sq" style="width:40px;height:40px;background:#000;color:#fff;border-radius:10px;font-size:12px;">驿能</div>
+        <div class="icon-sq" style="width:40px;height:40px;background:#000;color:#fff;border-radius:10px;font-size:12px;">生活</div>
         <div style="flex:1;">
-          <div class="bt">驿能光驰 · 已并入</div>
-          <div class="bs">充电找桩 / 充电中 / 账单 · 加油积分核销</div>
+          <div class="bt">智慧生活中枢 · 生活服务</div>
+          <div class="bs">充电 · 加油 · 净水 · 便民 — 与积分打通</div>
         </div>
       </div>
 
-      <div class="grid2 mb12">
-        <button class="card pad-card text-c" onclick="nav('charge-list')" style="margin:0;border:1.5px solid #000;">
-          <div class="ti" style="margin:0 auto;">充</div>
-          <div class="fw6 mt8">充电</div>
-          <div class="xs muted">找桩 · 扫码 · 积分抵扣</div>
+      <div class="grid4 mb12" style="gap:8px;">
+        <button class="tile" onclick="nav('charge-list')" style="padding:12px 4px;">
+          <div class="ti" style="width:36px;height:36px;border-radius:10px;font-size:13px;">充</div>
+          <div class="tl">充电</div>
         </button>
-        <button class="card pad-card text-c" onclick="nav('fuel')" style="margin:0;">
-          <div class="ti" style="margin:0 auto;">油</div>
-          <div class="fw6 mt8">加油</div>
-          <div class="xs muted">积分兑券 · 到店核销</div>
+        <button class="tile" onclick="nav('fuel')" style="padding:12px 4px;">
+          <div class="ti" style="width:36px;height:36px;border-radius:10px;font-size:13px;">油</div>
+          <div class="tl">加油</div>
+        </button>
+        <button class="tile" onclick="nav('water')" style="padding:12px 4px;border:1.5px solid #000;">
+          <div class="ti" style="width:36px;height:36px;border-radius:10px;font-size:13px;background:#000;color:#fff;">净</div>
+          <div class="tl">净水</div>
+        </button>
+        <button class="tile" onclick="nav('convenience')" style="padding:12px 4px;">
+          <div class="ti" style="width:36px;height:36px;border-radius:10px;font-size:13px;">便</div>
+          <div class="tl">便民</div>
         </button>
       </div>
 
@@ -2413,35 +2419,40 @@ function screenEnergy(){
         <div class="xs muted">点击查看实时功率与结算</div>
       </div>`:''}
 
-      <div class="section-title">充电记录</div>
+      <div class="section-title">绿色出行</div>
       <div class="card">
-        <div class="row tappable" onclick="nav('charge-active')">
-          <div class="icon-sq">充</div>
-          <div class="grow"><div class="t">驿能·南山科技园站</div><div class="s">昨天 · 38.2 度 · ¥42.60</div></div>
-          <span class="pill">已完成</span>
-        </div>
         <div class="row tappable" onclick="nav('charge-list')">
-          <div class="icon-sq">+</div>
-          <div class="grow"><div class="t">去找桩充电</div><div class="s">地图 / 列表 · 空闲枪筛选</div></div>
+          <div class="icon-sq">充</div>
+          <div class="grow"><div class="t">驿能光驰 · 找桩充电</div><div class="s">地图列表 · 充电中 · 积分抵扣</div></div>
           ${icons.chev}
         </div>
-      </div>
-
-      <div class="section-title">加油</div>
-      <div class="card">
         <div class="row tappable" onclick="nav('fuel')">
           <div class="icon-sq">油</div>
-          <div class="grow"><div class="t">附近加油站</div><div class="s">积分兑换加油券 · 出示核销</div></div>
+          <div class="grow"><div class="t">加油积分</div><div class="s">兑加油券 · 到店核销（${state.fuelCoupons.length} 张）</div></div>
           ${icons.chev}
         </div>
-        <div class="row tappable" onclick="nav('coupons')">
-          <div class="icon-sq">券</div>
-          <div class="grow"><div class="t">我的加油券（${state.fuelCoupons.length}）</div><div class="s">到店向油站出示</div></div>
+        <div class="row tappable" onclick="nav('energy-orders')">
+          <div class="icon-sq">单</div>
+          <div class="grow"><div class="t">充电 / 能源订单</div><div class="s">账单与历史记录</div></div>
           ${icons.chev}
         </div>
       </div>
 
-      <div class="notice"><strong>并入策略待确认：</strong>API 深度对接 vs 小程序跳转/H5 嵌入；历史「驿能光驰」用户与订单是否迁移（报价关键项）。</div>
+      <div class="section-title">健康家庭</div>
+      <div class="card">
+        <div class="row tappable" onclick="nav('water')">
+          <div class="icon-sq">净</div>
+          <div class="grow"><div class="t">智能净水</div><div class="s">设备状态 · 滤芯 · 换芯服务</div></div>
+          ${icons.chev}
+        </div>
+        <div class="row tappable" onclick="nav('convenience')">
+          <div class="icon-sq">便</div>
+          <div class="grow"><div class="t">便民服务</div><div class="s">话费 · 缴费 · 会员等候选</div></div>
+          ${icons.chev}
+        </div>
+      </div>
+
+      <div class="notice">二期中枢：本 Tab 由「能源」升级为「生活」，聚合充电/加油/净水/便民；积分可跨场景抵扣（规则后台可配）。</div>
     </div>
   </div>`;
 }
@@ -2632,7 +2643,7 @@ function screenFuel(){
 function screenEnergyOrders(){
   const list = state.orders.filter(o=>o.type!=='商超');
   return `
-  ${navBar('能源订单')}
+  ${navBar('生活订单')}
   <div class="content">
     <div class="pad">
       ${list.length===0?`<div class="empty"><div class="ei">充</div>暂无充电/加油订单</div>`:
