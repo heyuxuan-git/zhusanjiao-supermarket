@@ -943,7 +943,7 @@
             <div class="ad-frame">
               <div class="label">激励视频广告 · 模拟</div>
               <div class="h" id="adTitle">品牌广告位</div>
-              <div class="p" id="adDesc">观看完整视频可获得积分奖励。此为框架示意，上线接入穿山甲/优量汇等联盟 SDK。</div>
+              <div class="p" id="adDesc">观看完整视频可获得积分奖励。</div>
             </div>
             <div class="ad-count" id="adCount">剩余 3 秒</div>
             <div class="ad-reward" id="adReward" onclick="claimAdReward()">领取 +10 积分</div>
@@ -1053,8 +1053,8 @@ function openRewardedAd(kind){
   const reward = document.getElementById('adReward');
   document.getElementById('adTitle').textContent = kind==='browse'?'品牌浏览任务':'激励视频广告';
   document.getElementById('adDesc').textContent = kind==='browse'
-    ? '模拟浏览任务，完成后发放积分。上线对接广告联盟。'
-    : '完整观看后发放积分。上线接入激励视频 SDK。';
+    ? '完成浏览任务即可获得积分。'
+    : '完整观看视频可获得积分奖励。';
   reward.style.display='none';
   ov.classList.add('show');
   let t = 3;
@@ -1097,8 +1097,7 @@ function screenJumpStore(){
   ${navBar('超市')}
   <div class="content">
     <div class="pad">
-      <div class="notice"><strong>封装跳转：</strong>商超不在本 App 内下单，点击下方品牌进入对应能力（原型示意）。</div>
-      <div class="section-title">选择入口</div>
+            <div class="section-title">选择入口</div>
       <div class="grouped">
         <div class="row tappable" onclick="toast('跳转美宜佳 · 封装对接中')">
           <div class="icon-sq">美</div>
@@ -1116,8 +1115,7 @@ function screenJumpStore(){
           ${icons.chev}
         </div>
       </div>
-      <div class="notice mt16">积分可在结算侧按甲方规则抵扣；订单不在本 App「我的」中展示（后续若接口回传再议）。</div>
-    </div>
+          </div>
   </div>`;
 }
 
@@ -1126,15 +1124,13 @@ function screenJumpCharge(){
   ${navBar('充电')}
   <div class="content">
     <div class="pad">
-      <div class="notice"><strong>封装跳转：</strong>充电供应商已变更为 <strong>星能元</strong>，点击进入（原型示意）。</div>
-      <div class="card pad-card text-c" style="padding:36px 16px;">
+            <div class="card pad-card text-c" style="padding:36px 16px;">
         <div class="ti" style="width:56px;height:56px;border-radius:16px;margin:0 auto;font-size:18px;background:#000;color:#fff;">星</div>
         <div class="fw6 mt16" style="font-size:18px;">星能元充电</div>
         <div class="xs muted mt8">找桩 · 充电 · 账单（跳转封装）</div>
         <div class="mt16"><button class="btn" onclick="toast('跳转星能元 · 封装对接中')">立即前往</button></div>
       </div>
-      <div class="notice mt16">积分抵充电费规则以星能元/甲方配置为准，上线后在此说明。</div>
-    </div>
+          </div>
   </div>`;
 }
 
@@ -1153,8 +1149,7 @@ function screenExchange(){
           <button class="btn sm secondary" onclick="goTab('tasks')">去赚</button>
         </div>
       </div>
-      <div class="notice">当前为兑换框架：券/权益列表占位，供货接口确认后填充 SKU。</div>
-      <div class="section-title">可兑换</div>
+            <div class="section-title">可兑换</div>
       <div class="tc-goods">
         <div class="thumb">券<br/>示意</div>
         <div class="info">
@@ -1168,7 +1163,7 @@ function screenExchange(){
         <div class="thumb">权<br/>示意</div>
         <div class="info">
           <div class="title">视频会员周卡</div>
-          <div class="meta"><span>第三方权益</span><span>接口预留</span></div>
+          <div class="meta"><span>第三方权益</span><span>热销</span></div>
           <div class="prices"><span class="points">450 <span style="font-size:11px;font-weight:500;">积分</span></span></div>
         </div>
         <button class="add-btn" onclick="toast('权益接口对接中')">+</button>
@@ -1177,7 +1172,7 @@ function screenExchange(){
         <div class="thumb">油<br/>示意</div>
         <div class="info">
           <div class="title">加油券 ¥10</div>
-          <div class="meta"><span>到店核销</span><span>接口预留</span></div>
+          <div class="meta"><span>到店核销</span><span>热门</span></div>
           <div class="prices"><span class="points">600 <span style="font-size:11px;font-weight:500;">积分</span></span></div>
         </div>
         <button class="add-btn" onclick="toast('加油券接口对接中')">+</button>
@@ -1200,8 +1195,7 @@ function screenAgent(){
   ${navBar('推广代理')}
   <div class="content">
     <div class="pad">
-      <div class="notice"><strong>代理模块：</strong>App 推广代理入口。话术与联系方式为原型虚拟数据。</div>
-      <div class="card pad-card">
+            <div class="card pad-card">
         <div class="flex gap12 items-c">
           <div class="avatar">代</div>
           <div class="grow" style="flex:1;">
@@ -1235,9 +1229,7 @@ function screenAgent(){
         </div>
       </div>
 
-      <div class="section-title">代理说明</div>
-      <div class="notice">分享注册链接可统计邀新；佣金与结算规则由甲方后台配置，本原型仅展示入口与话术结构。</div>
-    </div>
+          </div>
   </div>`;
 }
 
@@ -1254,8 +1246,7 @@ function screenPointsHistory(){
             <div class="fw6">${r.d}</div>
           </div>`).join('')}
       </div>
-      <div class="notice mt16">积分仅通过广告任务获取，通过兑换等场景消耗；不可提现。</div>
-    </div>
+          </div>
   </div>`;
 }
 
@@ -1291,7 +1282,7 @@ function screenSettings(){
         <div class="row tappable"><div class="grow"><div class="t">账号与安全</div></div>${icons.chev}</div>
         <div class="row tappable"><div class="grow"><div class="t">消息通知</div></div><div class="v">已开启</div>${icons.chev}</div>
         <div class="row tappable"><div class="grow"><div class="t">隐私政策</div></div>${icons.chev}</div>
-        <div class="row tappable"><div class="grow"><div class="t">关于</div></div><div class="v">框架 v0.3</div>${icons.chev}</div>
+        <div class="row tappable"><div class="grow"><div class="t">关于</div></div><div class="v">v0.3</div>${icons.chev}</div>
       </div>
       <div class="mt16"><button class="btn block-danger" onclick="toast('退出登录（示意）')">退出登录</button></div>
     </div>
@@ -1376,8 +1367,7 @@ function screenHome(){
         </div>
       </div>
 
-      <div class="notice mt8"><strong>产品定位：</strong>广告积分中转站——看广告赚分，用积分链接甲方各封装资源。首页模块可按运营需要增减。</div>
-    </div>
+          </div>
   </div>`;
 }
 
@@ -1385,14 +1375,13 @@ function screenPlaza(){
   const apps = [
     {k:'store', name:'超市', desc:'美宜佳 · 钱大妈 · 自营 9 店', ic:'超', fn:"nav('jump-store')"},
     {k:'charge', name:'充电', desc:'星能元充电 · 跳转', ic:'星', fn:"nav('jump-charge')"},
-    {k:'exchange', name:'兑换', desc:'消耗积分 · 权益接口预留', ic:'兑', fn:"nav('exchange')"}
+    {k:'exchange', name:'兑换', desc:'积分换券与权益', ic:'兑', fn:"nav('exchange')"}
   ];
   return `
   ${navBar('应用广场', {back:false})}
   <div class="content">
     <div class="pad">
-      <div class="notice">封装应用统一入口。后续上新应用在此扩展，不占用一级导航。</div>
-      <div class="grid2" style="gap:12px;">
+            <div class="grid2" style="gap:12px;">
         ${apps.map(a=>`
           <button class="card pad-card text-c" onclick="${a.fn}" style="margin:0;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1.5px solid ${a.k==='store'?'#000':'#C6C6C8'};">
             <div class="ti" style="width:52px;height:52px;border-radius:16px;font-size:18px;${a.k==='store'?'background:#000;color:#fff;':''}">${a.ic}</div>
@@ -1401,9 +1390,7 @@ function screenPlaza(){
             <span class="pill ${a.k==='store'?'dark':''}" style="margin-top:4px;">进入</span>
           </button>`).join('')}
       </div>
-      <div class="section-title">说明</div>
-      <div class="notice">超市 / 充电为跳转封装；兑换为站内积分消耗（接口逐步替换占位 SKU）。</div>
-    </div>
+          </div>
   </div>`;
 }
 
@@ -1469,8 +1456,7 @@ function screenTasks(){
         </div>
       </div>
 
-      <div class="notice mt16">本 Tab 只负责<strong>广告产生积分</strong>；不承载下单、地址、订单等交易功能。</div>
-    </div>
+          </div>
   </div>`;
 }
 
@@ -1550,8 +1536,7 @@ function screenProfile(){
         </div>
       </div>
 
-      <div class="notice mt16">定位：广告积分中转站。商超/充电等交易在封装应用内完成，本 App 不再承载订单与收货地址。</div>
-    </div>
+          </div>
   </div>`;
 }
 
