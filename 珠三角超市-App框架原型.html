@@ -1299,17 +1299,22 @@ function screenHome(){
   return `
   <div class="content" id="content" style="padding-top:8px;">
     <div class="pad" style="padding-top:4px;">
-      <!-- 积分资产 Hero -->
-      <div class="tc-points" style="margin-bottom:12px;">
+      <!-- 右上角通知 -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <button onclick="nav('notifications')" aria-label="通知" style="width:36px;height:36px;border-radius:50%;background:var(--white);border:.5px solid var(--sep);display:flex;align-items:center;justify-content:center;position:relative;">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#1C1C1E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a5 5 0 0110 0c0 4 1.5 5 1.5 5h-13S4 11 4 7z"/><path d="M7.5 14.5a1.5 1.5 0 003 0"/></svg>
+          <span style="position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;background:#000;border:1.5px solid #fff;"></span>
+        </button>
+      </div>
+
+      <!-- 积分资产：点击数字进明细 -->
+      <div class="tc-points" style="margin-bottom:12px;cursor:pointer;" onclick="nav('points-history')">
         <div>
-          <div class="label">我的积分 <a href="javascript:void(0)" onclick="nav('points-history')">明细 ›</a></div>
-          <div class="num">${state.points}</div>
+          <div class="label">我的积分</div>
+          <div class="num" style="cursor:pointer;">${state.points}</div>
           <div class="sub">看广告赚积分 · 今日已得 ${state.pointsToday} 分</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <button class="mini-btn" onclick="goTab('tasks')">去赚积分</button>
-          <button class="mini-btn" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.5);" onclick="nav('exchange')">去花积分</button>
-        </div>
+        <div class="xs" style="opacity:.75;align-self:flex-end;padding-bottom:6px;">明细 ›</div>
       </div>
 
       <!-- 运营 Banner -->
@@ -1342,7 +1347,7 @@ function screenHome(){
         </div>
         <div class="row tappable" onclick="openBatchAds()">
           <div class="icon-sq">批</div>
-          <div class="grow"><div class="t">看广告任务批次</div><div class="s">今日看满 ${state.adsTodayGoal} 条额外指引</div></div>
+          <div class="grow"><div class="t">看广告任务批次</div><div class="s">今日看满 ${state.adsTodayGoal} 条</div></div>
           ${icons.chev}
         </div>
       </div>
@@ -1366,8 +1371,34 @@ function screenHome(){
           ${icons.chev}
         </div>
       </div>
+    </div>
+  </div>`;
+}
 
-          </div>
+function screenNotifications(){
+  const list = [
+    {t:'积分到账', s:'激励视频任务 +10 积分', time:'刚刚', unread:true},
+    {t:'兑换成功', s:'通用代金券已放入券包', time:'今天 12:00', unread:true},
+    {t:'系统通知', s:'欢迎使用，完成首个广告任务可得奖励', time:'昨天', unread:false},
+    {t:'活动提醒', s:'周末双倍积分活动即将开始', time:'2 天前', unread:false}
+  ];
+  return `
+  ${navBar('通知中心')}
+  <div class="content">
+    <div class="pad">
+      <div class="grouped">
+        ${list.map(n=>`
+          <div class="row tappable" onclick="toast('打开通知详情（示意）')">
+            <div class="icon-sq">${n.unread?'新':'通'}</div>
+            <div class="grow">
+              <div class="t fw6">${n.t}${n.unread?' <span class="badge-dot dark" style="margin-left:6px;">未读</span>':''}</div>
+              <div class="s">${n.s}</div>
+            </div>
+            <div class="xs muted">${n.time}</div>
+          </div>`).join('')}
+      </div>
+      <div class="mt16"><button class="btn secondary" onclick="toast('已全部标为已读')">全部已读</button></div>
+    </div>
   </div>`;
 }
 
@@ -1555,6 +1586,7 @@ function render(){
     const p = top.payload;
     switch(top.screen){
       case 'points-history': html = screenPointsHistory(); break;
+      case 'notifications': html = screenNotifications(); break;
       case 'exchange': html = screenExchange(); break;
       case 'coupons': html = screenCoupons(); break;
       case 'settings': html = screenSettings(); break;
