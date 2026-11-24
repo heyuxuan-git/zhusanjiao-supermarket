@@ -1378,9 +1378,9 @@ function screenPlaza(){
     {k:'exchange', name:'兑换', desc:'积分换券与权益', ic:'兑', fn:"nav('exchange')"}
   ];
   return `
-  ${navBar('应用广场', {back:false})}
-  <div class="content">
-    <div class="pad">
+  <div class="content" style="padding-top:8px;">
+    <div class="pad" style="padding-top:4px;">
+      <div style="font-size:28px;font-weight:700;letter-spacing:-.5px;margin-bottom:14px;">应用广场</div>
             <div class="grid2" style="gap:12px;">
         ${apps.map(a=>`
           <button class="card pad-card text-c" onclick="${a.fn}" style="margin:0;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1.5px solid ${a.k==='store'?'#000':'#C6C6C8'};">
@@ -1397,9 +1397,12 @@ function screenPlaza(){
 function screenTasks(){
   const remain = Math.max(0, state.adsTodayGoal - state.adsWatched);
   return `
-  ${navBar('积分任务', {back:false, right:`<button onclick="nav('points-history')" style="font-size:15px;">明细</button>`})}
-  <div class="content">
-    <div class="pad">
+  <div class="content" style="padding-top:8px;">
+    <div class="pad" style="padding-top:4px;">
+      <div class="flex between items-c" style="margin-bottom:12px;">
+        <div style="font-size:28px;font-weight:700;letter-spacing:-.5px;">积分任务</div>
+        <button class="pill" onclick="nav('points-history')">明细</button>
+      </div>
       <div class="asset-card">
         <div class="flex between items-c">
           <div>
@@ -1463,9 +1466,12 @@ function screenTasks(){
 function screenProfile(){
   const a = state.agent;
   return `
-  ${navBar('我的', {back:false, right:`<button onclick="nav('settings')" style="font-size:15px;">设置</button>`})}
-  <div class="content">
-    <div class="pad" style="padding-bottom:28px;">
+  <div class="content" style="padding-top:8px;">
+    <div class="pad" style="padding-top:4px;padding-bottom:28px;">
+      <div class="flex between items-c" style="margin-bottom:14px;">
+        <div style="font-size:28px;font-weight:700;letter-spacing:-.5px;">我的</div>
+        <button class="pill" onclick="nav('settings')">设置</button>
+      </div>
       <div class="profile-hero">
         <div class="ph-top">
           <div class="avatar">张</div>
